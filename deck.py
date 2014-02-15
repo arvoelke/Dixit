@@ -21,7 +21,7 @@ class CardSet(object):
 
     def __init__(self, name, card_paths, is_default=False):
         self.name = name
-        prefix = hash_obj(name)[:5]  # must be unique
+        prefix = hash_obj(name, add_random=True)[:5]  # must be unique
         self.cards = [Card('card%s%d' % (prefix, i), p)
                       for i, p in enumerate(card_paths)]
         self.is_default = is_default

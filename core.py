@@ -4,7 +4,7 @@ import time
 
 from codes import APIError, Codes
 from deck import Deck
-
+from display import BunnyPalette
 from utils import INFINITY
 
 
@@ -58,9 +58,10 @@ class Player(object):
         if card is not None:
             self.hand.append(card)
 
+    def has_card(self, card):
+        return card in self.hand
+
     def remove_card(self, card):
-        if not card in self.hand:
-            raise APIError(Codes.NOT_HAVE_CARD)
         self.hand.remove(card)
 
 
@@ -150,6 +151,8 @@ class Game(object):
             raise APIError(Codes.BEGIN_BAD_STATE)
         if len(self.players) >= self.max_players:
             raise APIError(Codes.JOIN_FULL_ROOM)
+        if not BunnyPalette.is_colour(colour):
+            raise APIError(Codes.NOT_A_COLOUR, colour)
         if colour in self.colours.values():
             raise APIError(Codes.COLOUR_TAKEN)
         if user in self.perma_banned:
@@ -162,14 +165,15 @@ class Game(object):
     def kick_player(self, user, is_permanent=False):
         if not user in self.players:
             raise APIError(Codes.KICK_UNKNOWN_USER)
-        if len(self.players) <= Limits.MIN_PLAYERS and self.state != States.BEGIN:
+        if len(self.players) <= Limits.MIN_PLAYERS and \
+           self.state != States.BEGIN:
             raise APIError(Codes.NOT_ENOUGH_PLAYERS)
         if self.state in (States.PLAY, States.VOTE):
             raise APIError(Codes.KICK_BAD_STATE)
         self.players.pop(user)
         turn = self.order.index(user)
         self.order.remove(user)
-        # readjust turn in case game is currently running
+        # Readjust turn in case game is currently running
         if self.turn > turn:
             self.turn -= 1
         self.turn %= len(self.players)
@@ -213,6 +217,8 @@ class Game(object):
             raise APIError(Codes.CLUE_TOO_SHORT)
         if len(clue) > self.max_clue_length:
             raise APIError(Codes.CLUE_TOO_LONG)
+        if not self.players[user].has_card(card):
+            raise APIError(Codes.NOT_HAVE_CARD)
         self.round = Round(self.players, clue, self.clue_maker())
         self.round.play_card(user, card)
         self.players[user].deal(self.deck.deal())
@@ -226,6 +232,10 @@ class Game(object):
             raise APIError(Codes.PLAY_NOT_TURN)
         if not user in self.players:
             raise APIError(Codes.PLAY_UNKNOWN_USER)
+        if self.round.has_played(user):
+            raise APIError(Codes.PLAY_ALREADY)
+        if not self.players[user].has_card(card):
+            raise APIError(Codes.NOT_HAVE_CARD)
         self.round.play_card(user, card)
         self.players[user].deal(self.deck.deal())
         if self.round.has_everyone_played():
@@ -243,12 +253,13 @@ class Game(object):
             raise APIError(Codes.VOTE_UNKNOWN_USER)
         if not self.round.has_card(card):
             raise APIError(Codes.VOTE_INVALID)
+        if self.round.has_voted(user):
+            raise APIError(Codes.VOTE_ALREADY)
         self.round.cast_vote(user, card)
         if self.round.has_everyone_voted():
-            # Remember this in case someone gets kicked
             self._do_scoring()
-            self.state = States.CLUE
             self.turn = (self.turn + 1) % len(self.players)
+            self.state = States.CLUE
             if self.deck.is_empty():
                 self.state = States.END
             for p in self.players.itervalues():

@@ -3,11 +3,11 @@ import hashlib
 import random
 import sys
 import StringIO
-    
+
 INFINITY = 1e9
 SALT = '1c(R$p{Gsjk/5'
-    
-    
+
+
 def hash_obj(obj, salt=SALT, add_random=False, algo=hashlib.sha256):
     s = '%s%s%s' % (obj, salt, random.random() if add_random else '')
     return algo(s.encode('utf-8')).hexdigest()
@@ -28,8 +28,12 @@ def get_sorted_positions(l, key):
         pos += 1
         i += 1
     return new_l
-    
-    
+
+
+def url_join(*args):
+    return '/'.join(args)
+
+
 @contextlib.contextmanager
 def sysstd(stdout=None):
     oldout = sys.stdout

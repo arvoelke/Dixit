@@ -9,7 +9,7 @@ from codes import APIError, Codes
 from deck import CardSet
 from core import Limits, States, StringClue, Game
 from users import Users
-from utils import INFINITY, hash_obj, get_sorted_positions, sysstd
+from utils import INFINITY, hash_obj, get_sorted_positions, url_join, sysstd
 from chat import ChatLog
 import display
 
@@ -199,8 +199,6 @@ class GameHandler(RequestHandler):
             self.write(self._get_board(self.user, game))
         elif cmd == Commands.JOIN_GAME:
             colour = self.get_argument('colour')
-            if not display.BunnyPalette.is_colour(colour):
-                raise APIError(Codes.NOT_A_COLOUR, colour)
             game.add_player(self.user, colour)
         elif cmd == Commands.START_GAME:
             game.start_game()
@@ -267,7 +265,7 @@ class GameHandler(RequestHandler):
             'user' : user.puid,
             'host' : game.host.puid,
             'players' : players,
-            'colours' : dict((u.puid, colour) for u, colour in game.colours.items()),
+            'colours' : dict((u.puid, col) for u, col in game.colours.items()),
             'isHost' : user == game.host,
             'isPlayer' : user in game.players,
             'maxPlayers' : game.max_players,
@@ -308,7 +306,7 @@ def has_suffix(s, suffixes):
 
 def find_cards(folder, suffixes=('.jpg',)):
     path = os.path.join(display.WebPaths.CARDS, folder)
-    return [os.path.join(path, name)
+    return [url_join(display.WebPaths.CARDS, folder, name)
         for name in os.listdir(os.path.join(os.path.dirname(__file__), path))
         if has_suffix(name, suffixes)]
 
@@ -319,6 +317,8 @@ class Application(tornado.web.Application):
         self.users = Users()
         self.games = []
         self.chat_log = ChatLog()
+
+        print display.WebPaths.IMAGES
 
         self.card_sets = [
             CardSet('Dixit', find_cards('dixit'), True),
@@ -350,5 +350,5 @@ application = Application([
 
 
 if __name__ == "__main__":
-    application.listen(80)
+    application.listen(8888)
     tornado.ioloop.IOLoop.instance().start()
