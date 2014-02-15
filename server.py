@@ -1,24 +1,38 @@
+"""Entry point for running the Dixit server.
+
+Usage: python server.py [config.json]
+
+See https://github.com/arvoelke/dixit or README.md for more information.
+
+Refer to LICENSE.txt for terms of modification and redistribution.
+"""
+
 import tornado.ioloop
 import tornado.web
 
 import json
 import os
+import sys
 import time
 
-from codes import APIError, Codes
-from deck import CardSet
-from core import Limits, States, StringClue, Game
-from users import Users
-from utils import INFINITY, hash_obj, get_sorted_positions, url_join, sysstd
 from chat import ChatLog
+from codes import APIError, Codes
+from core import Limits, States, StringClue, Game
+from deck import CardSet
+from users import Users
+from utils import INFINITY, hash_obj, get_sorted_positions, url_join, \
+    capture_stdout
+import config
 import display
 
 
 class RequestHandler(tornado.web.RequestHandler):
+    """Base class for all request handlers. Injects authenticated self.user."""
 
     USER_COOKIE_NAME = 'dixit_user'
 
     def prepare(self):
+        """Sets self.user based off hash in existing cookie, or a new cookie."""
         uid = self.get_cookie(self.USER_COOKIE_NAME)
         if not self.application.users.has_user(uid):
             if uid is None:
@@ -32,6 +46,7 @@ class RequestHandler(tornado.web.RequestHandler):
 
 
 class MainHandler(RequestHandler):
+    """Handler for rendering main.html with the server's template variables."""
 
     def get(self):
         self.render('main.html',
@@ -41,16 +56,8 @@ class MainHandler(RequestHandler):
             limits=Limits)
 
 
-class MainCSSHandler(tornado.web.RequestHandler):
-
-    def get(self):
-        self.set_header('Content-Type', 'text/css')
-        self.render('main.css',
-            display=display,
-            cards_per_person=Game.CARDS_PER_PERSON)
-
-
 class MainJSHandler(tornado.web.RequestHandler):
+    """Handler for rendering main.js with the server's template variables."""
 
     def get(self):
         self.set_header('Content-Type', 'text/javascript')
@@ -61,27 +68,36 @@ class MainJSHandler(tornado.web.RequestHandler):
             limits=Limits)
 
 
-class AdminHandler(RequestHandler):
-
-    ADMIN_PASSWORD = '4a4fd0c6d7ec87b9c52732fc63fa0549e4824edc7d0514f47747fa315f1d075a'
+class MainCSSHandler(tornado.web.RequestHandler):
+    """Handler for rendering main.css with the server's template variables."""
 
     def get(self):
-        self.render('admin.html',
-            display=display)
+        self.set_header('Content-Type', 'text/css')
+        self.render('main.css',
+            display=display,
+            cards_per_person=Game.CARDS_PER_PERSON)
+
+
+class AdminHandler(RequestHandler):
+    """Handler for executing arbitrary code on the server in real time."""
+
+    def get(self):
+        self.render('admin.html', display=display)
 
     def post(self):
-        if hash_obj(self.get_argument('password')) != self.ADMIN_PASSWORD:
+        admin_password = hash_obj(self.get_argument('password'))
+        if admin_password != self.application.admin_password:
             stdout = ''
             stderr = 'Invalid password'
         else:
             try:
-                with sysstd() as s:
+                with capture_stdout() as stdout_context:
                     exec self.get_argument('code').replace('\r', '')
-                stdout = s.getvalue()
+                stdout = stdout_context.getvalue()
                 stderr = ''
-            except Exception as e:
+            except Exception as exc:
                 stdout = ''
-                stderr = unicode(e).encode('utf-8')
+                stderr = unicode(exc).encode('utf-8')
         self.write({
             'stdout' : stdout,
             'stderr' : stderr,
@@ -89,6 +105,7 @@ class AdminHandler(RequestHandler):
 
 
 class SetUsernameHandler(RequestHandler):
+    """Handler for changing your own username."""
 
     def post(self):
         username = self.get_argument('username', default=None)
@@ -97,14 +114,15 @@ class SetUsernameHandler(RequestHandler):
 
 
 class CreateHandler(RequestHandler):
+    """Handler for creating a new game."""
 
     def post(self):
-        print self.request.arguments['card_sets']
         try:
-            card_set_indices = [int(i) for i in self.request.arguments['card_sets']]
-        except ValueError as e:
-            raise APIError(Codes.NOT_AN_INTEGER, e)
-        if False in (0 <= i < len(self.application.card_sets) for i in card_set_indices):
+            card_set_indices = map(int, self.request.arguments['card_sets'])
+        except ValueError as exc:
+            raise APIError(Codes.NOT_AN_INTEGER, exc)
+        if min(card_set_indices) < 0 or \
+           max(card_set_indices) >= len(self.application.card_sets):
             raise APIError(Codes.ILLEGAL_RANGE, card_set_indices)
         card_sets = [self.application.card_sets[i] for i in card_set_indices]
 
@@ -122,8 +140,8 @@ class CreateHandler(RequestHandler):
             max_score = int(max_score)
             max_players = int(self.get_argument('max_players'))
             max_clue_length = int(self.get_argument('max_clue_length'))
-        except ValueError as e:
-            raise APIError(Codes.NOT_AN_INTEGER, e)
+        except ValueError as exc:
+            raise APIError(Codes.NOT_AN_INTEGER, exc)
 
         if (not Limits.MIN_NAME <= len(name) <= Limits.MAX_NAME) or \
            (not Limits.MIN_PLAYERS <= max_players <= Limits.MAX_PLAYERS) or \
@@ -138,6 +156,7 @@ class CreateHandler(RequestHandler):
 
 
 class GetGamesHandler(RequestHandler):
+    """Handler for getting the list of all games."""
 
     def get(self):
         blob = []
@@ -153,16 +172,19 @@ class GetGamesHandler(RequestHandler):
                 'state' : game.state,
                 'left' : game.deck.left(),
                 'size' : game.deck.size(),
-                'topScore' : max(p.score for p in game.players.values()) if game.players else 0,
-                'maxScore' : game.max_score if game.max_score != INFINITY else None,
+                'topScore' : max(p.score for p in game.players.values()) \
+                    if game.players else 0,
+                'maxScore' : game.max_score \
+                    if game.max_score != INFINITY else None,
                 'deckName' : game.deck.name,
                 'isHost' : self.user == game.host,
                 'isPlayer' : self.user in game.players,
             })
-        self.write(json.dumps(sorted(blob, key=lambda x:x['relLastActive'])))
+        self.write(json.dumps(sorted(blob, key=lambda x: x['relLastActive'])))
 
 
 class GetUsersHandler(RequestHandler):
+    """Handler for getting the list of all users."""
 
     def get(self):
         blob = []
@@ -175,7 +197,23 @@ class GetUsersHandler(RequestHandler):
         self.write(json.dumps(sorted(blob, key=lambda x: x['relLastActive'])))
 
 
+class ChatHandler(RequestHandler):
+    """Handler for posting to and reading from the chat log."""
+
+    def get(self):
+        last_time = float(self.get_argument('t'))
+        self.write({
+            'log' : self.application.chat_log.dump_since(last_time),
+            't' : time.time(),
+        })
+
+    def post(self):
+        msg = self.get_argument('msg')[:Limits.MAX_MESSAGE]
+        self.application.chat_log.add(self.user.name, msg)
+
+
 class Commands(object):
+    """Possible commands for the GameHandler, to be used in the JavaScript."""
 
     GET_BOARD = 0
     JOIN_GAME = 1
@@ -187,10 +225,12 @@ class Commands(object):
 
 
 class GameHandler(RequestHandler):
+    """Handler for getting the game board and routing actions."""
 
     def get(self, gid, cmd):
+        """Delegates the request to the corresponding core game operation."""
         gid = int(gid)
-        if not (0 <= gid < len(self.application.games)):
+        if not 0 <= gid < len(self.application.games):
             raise APIError(Codes.ILLEGAL_RANGE, gid)
         game = self.application.games[gid]
 
@@ -220,6 +260,7 @@ class GameHandler(RequestHandler):
 
     @classmethod
     def _get_board(cls, user, game):
+        """Returns a JSON dictionary summarizing the entire game board."""
         players = dict((u.puid, u.name) for u in game.players)
         scores = dict((u.puid, p.score) for u, p in game.players.items())
         is_player = user in game.players
@@ -227,15 +268,16 @@ class GameHandler(RequestHandler):
         requires_action = {}
         for u in game.players:
             requires_action[u.puid] = {
-                States.BEGIN: game.host == u and len(players) >= Limits.MIN_PLAYERS,
+                States.BEGIN: game.host == u and \
+                    len(players) >= Limits.MIN_PLAYERS,
                 States.CLUE: game.clue_maker() == u,
                 States.PLAY: not game.round.has_played(u),
                 States.VOTE: not game.round.has_voted(u),
                 States.END: False,  # game.host == u,
             }[game.state]
 
-        uids = players.keys()
-        ranked = get_sorted_positions(uids, key=lambda uid:scores[uid])
+        puids = players.keys()
+        ranked = get_sorted_positions(puids, key=lambda puid: scores[puid])
 
         rnd = {}
         if game.round.has_everyone_played():
@@ -274,7 +316,7 @@ class GameHandler(RequestHandler):
             'scores' : scores,
             'order' : [u.puid for u in game.order],
             'turn' : game.turn,
-            'ranked' : dict((uid, rank) for uid, rank in zip(uids, ranked)),
+            'ranked' : dict((uid, rank) for uid, rank in zip(puids, ranked)),
             'left' : game.deck.left(),
             'size' : game.deck.size(),
             'state' : game.state,
@@ -286,44 +328,32 @@ class GameHandler(RequestHandler):
         return blob
 
 
-class ChatHandler(RequestHandler):
-
-    def get(self):
-        t = float(self.get_argument('t'))
-        self.write(json.dumps({
-            'log' : self.application.chat_log.dump_until(t),
-            't' : time.time(),
-        }))
-
-    def post(self):
-        msg = self.get_argument('msg')[:Limits.MAX_MESSAGE]
-        self.application.chat_log.add(self.user.name, msg)
-
-
-def has_suffix(s, suffixes):
-    return True in (s.endswith(suffix) for suffix in suffixes)
+def has_suffix(name, suffixes):
+    """Returns true iff name ends with at least one of the given suffixes."""
+    return True in (name.endswith(suffix) for suffix in suffixes)
 
 
 def find_cards(folder, suffixes=('.jpg',)):
-    path = os.path.join(display.WebPaths.CARDS, folder)
+    """Returns all urls for a given folder, matching the given suffixes."""
+    path = os.path.join(
+        os.path.dirname(__file__), display.WebPaths.CARDS, folder)
     return [url_join(display.WebPaths.CARDS, folder, name)
-        for name in os.listdir(os.path.join(os.path.dirname(__file__), path))
-        if has_suffix(name, suffixes)]
+        for name in os.listdir(path) if has_suffix(name, suffixes)]
 
 
 class Application(tornado.web.Application):
+    """Main application class for holding all state."""
 
     def __init__(self, *args, **kwargs):
+        """Initializes the users, games, chat log, and cards."""
         self.users = Users()
         self.games = []
         self.chat_log = ChatLog()
 
-        print display.WebPaths.IMAGES
-
-        self.card_sets = [
-            CardSet('Dixit', find_cards('dixit'), True),
-            CardSet('IMDB Posters', find_cards('imdb')),
-        ]
+        # Specifies where to find all the card images for each set.
+        self.card_sets = [CardSet(name, find_cards(folder), enabled)
+            for name, (folder, enabled) in kwargs['card_sets'].iteritems()]
+        self.admin_password = kwargs['admin_password']
 
         super(Application, self).__init__(*args, **kwargs)
 
@@ -334,6 +364,8 @@ settings = {
     'debug' : True,
 }
 
+configFilename = (sys.argv + ['config.json'])[1]
+settings.update(config.parse(configFilename))
 
 application = Application([
     (r'/', MainHandler),
@@ -348,7 +380,7 @@ application = Application([
     (r'/chat', ChatHandler),
 ], **settings)
 
-
 if __name__ == "__main__":
-    application.listen(8888)
+
+    application.listen(settings['port'])
     tornado.ioloop.IOLoop.instance().start()

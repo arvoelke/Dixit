@@ -1,3 +1,5 @@
+"""Core logic and validation to handle one particular game."""
+
 from collections import defaultdict
 import random
 import time
@@ -9,6 +11,7 @@ from utils import INFINITY
 
 
 class Limits(object):
+    """Static parameter limits for validation."""
 
     MIN_NAME = 3
     MAX_NAME = 20
@@ -26,17 +29,20 @@ class Limits(object):
 
 
 class States(object):
+    """Possible states for the game."""
 
-    BEGIN = 0
-    CLUE = 1
-    PLAY = 2
-    VOTE = 3
-    END = 4
+    BEGIN = 0  # Waiting for players to start the game.
+    CLUE = 1   # A clue is being made.
+    PLAY = 2   # Cards are being collected.
+    VOTE = 3   # Voting is occurring.
+    END = 4    # The game is over.
 
 
 class StringClue(object):
+    """Simple clue container. Returns the encoded text with str()."""
 
     def __init__(self, clue):
+        """Initializes the clue with a given string."""
         self.clue = clue
 
     def __str__(self):
@@ -50,33 +56,38 @@ class Player(object):
     """Manages a user with respect to a particular game (hand/score)."""
 
     def __init__(self, user):
+        """Initializes the player for the given user with no hand or score."""
         self.user = user
         self.hand = []
         self.score = 0
 
     def deal(self, card):
+        """Appends a card (if not None) to the hand."""
         if card is not None:
             self.hand.append(card)
 
     def has_card(self, card):
+        """Returns true iff the user has the given card in their hand."""
         return card in self.hand
 
     def remove_card(self, card):
+        """Removes the card from the user's hand or raises ValueError."""
         self.hand.remove(card)
 
 
 class Round(object):
-    """Manages all player states across one turn (state.VOTE -> state.VOTE)."""
+    """Handles all player state across one turn (state.VOTE -> state.VOTE)."""
 
     def __init__(self, players, clue, clue_maker):
+        """Initializes the round for the given players, clue, and clue maker."""
         self.players = players
         self.clue = clue
         self.clue_maker = clue_maker
         self.cards = []
-        self.user_to_card = dict()
-        self.user_to_vote = dict()
-        self.card_to_voted_users = defaultdict(list)  # ignores self-votes
-        self.scores = defaultdict(int)
+        self.user_to_card = dict()  # User -> Card
+        self.user_to_vote = dict()  # User -> Card
+        self.card_to_voted_users = defaultdict(list)  # Card -> list(User)
+        self.scores = defaultdict(int)  # User -> int
 
         # Determine the random card order ahead of time
         self.card_index_to_user = players.keys()
@@ -84,42 +95,53 @@ class Round(object):
 
     @classmethod
     def make_zeroeth(cls):
+        """Creates a round object suitable for the very beginning."""
         # Use a non-empty list of players so that has_everyone_* returns False.
-        return cls({None: None}, None, None)
+        return cls({None: None}, None, None)  # no clues/cards/votes
 
     def play_card(self, user, card):
+        """Removes the card from the user's hand, and remembers the action."""
         self.players[user].remove_card(card)
         self.user_to_card[user] = card
 
     def cast_vote(self, user, card):
+        """Makes the given user vote for the given card."""
         self.user_to_vote[user] = card
-        if card != self.user_to_card[user]:
+        if card != self.user_to_card[user]:  # ignore self-votes
             self.card_to_voted_users[card].append(user)
 
     def has_card(self, card):
+        """Returns true iff the card has been played."""
         return card in self.user_to_card.itervalues()
 
     def has_played(self, user):
+        """Returns true iff the user has already played a card this round."""
         return self.user_to_card.has_key(user)
 
     def has_voted(self, user):
+        """Returns true iff the user has already voted for a card this round."""
         return self.user_to_vote.has_key(user)
 
     def has_everyone_played(self):
+        """Returns true iff every player has_played(...)."""
         return len(self.user_to_card) == len(self.players)
 
     def has_everyone_voted(self):
+        """Returns true iff every player has_voted(...)."""
         return len(self.user_to_vote) == len(self.players)
 
     def get_cards(self):
+        """Gets the played cards in a fixed random order."""
         return [self.user_to_card[user] for user in self.card_index_to_user]
 
     def score(self, user, score):
+        """Increments the user's score for this round."""
         self.players[user].score += score
         self.scores[user] += score
 
 
 class Game(object):
+    """Handles all data over the lifetime of a single game."""
 
     CARDS_PER_PERSON = 6
     SCORE_FOR_TRICK = 1
@@ -128,6 +150,7 @@ class Game(object):
 
     def __init__(self, host, card_sets, password, name, max_players,
                  max_score, max_clue_length):
+        """Initializes the game with the parameters from CreateHandler."""
         self.host = host
         self.deck = Deck(card_sets)
         self.password = password
@@ -140,13 +163,31 @@ class Game(object):
         self.order = []
         self.colours = dict()
         self.perma_banned = set()
+
         self.init_game()
         self.ping()
 
+    def init_game(self):
+        """Initializes the game into a BEGIN state."""
+        self.state = States.BEGIN
+        self.round = Round.make_zeroeth()
+        self.turn = 0
+        self.deck.reset()
+
     def ping(self):
+        """Updates the game to appear currently active."""
         self.last_active = time.time()
 
+    def clue_maker(self):
+        """Returns the User who made, or is making, the current clue."""
+        return self.order[self.turn]
+
+    def get_card(self, cid):
+        """Returns the Card from the deck with the given card id."""
+        return self.deck.get_card(cid)
+
     def add_player(self, user, colour):
+        """Adds a user with a given colour to the game, or throws APIError."""
         if self.state != States.BEGIN:
             raise APIError(Codes.BEGIN_BAD_STATE)
         if len(self.players) >= self.max_players:
@@ -163,6 +204,7 @@ class Game(object):
         self.colours[user] = colour  # alow colour changing
 
     def kick_player(self, user, is_permanent=False):
+        """Kicks a user from the game, or throws APIError."""
         if not user in self.players:
             raise APIError(Codes.KICK_UNKNOWN_USER)
         if len(self.players) <= Limits.MIN_PLAYERS and \
@@ -180,26 +222,15 @@ class Game(object):
         if is_permanent:
             self.perma_banned.add(user)
 
-    def init_game(self):
-        self.state = States.BEGIN
-        self.round = Round.make_zeroeth()
-        self.turn = 0
-        self.deck.reset()
-
-    def clue_maker(self):
-        return self.order[self.turn]
-
-    def get_card(self, cid):
-        return self.deck.get_card(cid)
-
     def start_game(self):
+        """Transitions from BEGIN to CLUE, or throws APIError."""
         if self.state != States.BEGIN:
             raise APIError(Codes.BEGIN_BAD_STATE)
         if len(self.players) < Limits.MIN_PLAYERS:
             raise APIError(Codes.NOT_ENOUGH_PLAYERS)
         random.shuffle(self.order)
         for user in self.players:
-            for i in range(self.CARDS_PER_PERSON):
+            for _ in range(self.CARDS_PER_PERSON):
                 card = self.deck.deal()
                 if card is None:
                     self.init_game()  # rewind the dealing
@@ -209,6 +240,7 @@ class Game(object):
         self.ping()
 
     def create_clue(self, user, clue, card):
+        """Transitions from CLUE to PLAY, or throws APIError."""
         if self.state != States.CLUE:
             raise APIError(Codes.CLUE_BAD_STATE)
         if user != self.clue_maker():
@@ -226,6 +258,7 @@ class Game(object):
         self.ping()
 
     def play_card(self, user, card):
+        """Makes the given user play a card, or throws APIError."""
         if self.state != States.PLAY:
             raise APIError(Codes.PLAY_BAD_STATE)
         if user == self.clue_maker():
@@ -239,12 +272,14 @@ class Game(object):
         self.round.play_card(user, card)
         self.players[user].deal(self.deck.deal())
         if self.round.has_everyone_played():
+            # Transition from PLAY to VOTE.
             self.round.cast_vote(self.clue_maker(),
                                  self.round.user_to_card[self.clue_maker()])
             self.state = States.VOTE
         self.ping()
 
     def cast_vote(self, user, card):
+        """Make the given user vote for a card, or throws APIError."""
         if self.state != States.VOTE:
             raise APIError(Codes.VOTE_BAD_STATE)
         if user == self.clue_maker():
@@ -257,6 +292,7 @@ class Game(object):
             raise APIError(Codes.VOTE_ALREADY)
         self.round.cast_vote(user, card)
         if self.round.has_everyone_voted():
+            # Transition from VOTE to CLUE or END.
             self._do_scoring()
             self.turn = (self.turn + 1) % len(self.players)
             self.state = States.CLUE
@@ -268,6 +304,7 @@ class Game(object):
         self.ping()
 
     def _do_scoring(self):
+        """Increments the scores of all players for this Round."""
         for user in self.players:
             v = self.round.card_to_voted_users[self.round.user_to_card[user]]
             if user == self.clue_maker():

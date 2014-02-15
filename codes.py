@@ -4,12 +4,13 @@
 class APIError(Exception):
     """Generic server-side exceptions for when the API is used incorrectly."""
 
-    def __init__(self, code, data=None):
+    def __init__(self, code, exc=None, *args, **kwargs):
         self.code = code
-        self.data = data
+        self.exc = exc
+        super(APIError, self).__init__(exc, *args, **kwargs)
 
     def __str__(self):
-        tag = ': "%s"' % self.data if self.data is not None else ''
+        tag = ': "%s"' % self.exc if self.exc is not None else ''
         return '%s%s' % (self.code, tag)
 
 

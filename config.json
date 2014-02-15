@@ -1,0 +1,13 @@
+{
+    // Port for the server to listen on.
+    "port" : 80,
+
+    // Sets of cards available, used to build a deck for a game.
+    "card_sets" : {
+        // <name-of-card-set> : [static/cards/<folder>, <is-default-checked>]
+        "Dixit" : ["dixit", true]
+    },
+
+    // utils.hash_obj() of password for /admin/ page
+    "admin_password" : "4a4fd0c6d7ec87b9c52732fc63fa0549e4824edc7d0514f47747fa315f1d075a"
+}
