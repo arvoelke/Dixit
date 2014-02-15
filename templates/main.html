@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+
+{% block head %}
+
+<link rel="stylesheet" href="{{ display.WebPaths.JQUERY_UI }}/css/theme/jquery-ui-1.10.4.custom.css"></link>
+<link rel="stylesheet" href="{{ display.WebPaths.CSS }}/magnifier.css"></link>
+<link rel="stylesheet" href="main.css"></link>
+
+<script type="text/javascript" src="{{ display.WebPaths.JQUERY_UI }}/js/jquery-1.10.2.js"></script>
+<script type="text/javascript" src="{{ display.WebPaths.JQUERY_UI }}/js/jquery-ui-1.10.4.custom.min.js"></script>
+<script type="text/javascript" src="{{ display.WebPaths.JS }}/jquery.jeditable.js"></script>
+<script type="text/javascript" src="{{ display.WebPaths.JS }}/jquery.validate.min.js"></script>
+<script type="text/javascript" src="{{ display.WebPaths.JS }}/purl.js"></script>
+<script type="text/javascript" src="{{ display.WebPaths.JS }}/magnifier.js"></script>
+<script type="text/javascript" src="{{ display.WebPaths.JS }}/smilies.js"></script>
+<script type="text/javascript" src="main.js"></script>
+
+{% end %}
+
+{% block body %}
+
+<div id="overlay"></div>
+
+<div id="banner">
+    <a href=""><img id="dixitLogo" src="{{ display.Images.BANNER }}" title="Dixit Online" /></a>
+    <div id="createTab">{{ display.Labels.NEW_GAME }}</div>
+    <div id="gameListOuter">
+        <div id="gameList">
+            <table id="gameTable" cellspacing="0" cellpadding="0" border="0">
+            </table>
+        </div>
+        <div id="gameListPadder"></div>
+    </div>
+</div>
+
+<div id="create">
+    <h1>{{ display.Labels.NEW_GAME }}</h1>
+    <form id="createForm" action="create" method="post">
+        <table cellspacing="0" cellpadding="4" border="0">
+            <tr>
+                <td><label>Name (optional)</label></td>
+                <td><input type="text" name="name" value=""
+                            minlength="{{ limits.MIN_NAME }}" maxlength="{{ limits.MAX_NAME }}" /></td>
+            </tr>
+            <tr>
+                <td><label>Max Players</label></td>
+                <td><input type="text" name="max_players" value="6"
+                            min="{{ limits.MIN_PLAYERS }}" max="{{ limits.MAX_PLAYERS }}" size="4" required /></td>
+            </tr>
+            <tr>
+                <td><label>Max Score (optional)</label></td>
+                <td><input type="text" name="max_score" value="30"
+                            min="{{ limits.MIN_SCORE }}" max="{{ limits.MAX_SCORE }}" size="4" /></td>
+            </tr>
+            <tr>
+                <td><label>Maximum Clue Length</label></td>
+                <td><input type="text" name="max_clue_length" value="1000"
+                            min="{{ limits.MIN_CLUE_LENGTH }}" max="{{ limits.MAX_CLUE_LENGTH }}" size="4" required /></td>
+            </tr>
+            <tr>
+                <td><label>Deck Building</label></td>
+                <td>
+                    {% for i, card_set in enumerate(card_sets) %}
+                    <p>
+                        <input type="checkbox" name="card_sets" value="{{ i }}" {{ 'checked' if card_set.is_default else '' }} />
+                        {{ card_set.name }} ({{ card_set.size() }})
+                    </p>
+                    {% end %}
+                </td>
+            </tr>
+        </table>
+
+        <input type="submit" id="createOk" value="Create" /> <button id="cancelCreate">Cancel</button>
+    </form>
+</div>
+
+<div id="chatRoomContainer">
+    <div id="chatRoom">
+        <div id="username">{{ user.name }}</div>
+        <div id="userTableOuter">
+            <table id="userTable">
+            </table>
+        </div>
+        <div id="chatLog"></div>
+        <form id="sendMsg">
+            <table id="chatInputContainer" cellspacing="0" cellpadding="0" border="0">
+                <tr>
+                    <td><input id="chatInput" type="text" name="msg" value="{{ display.Labels.DEFAULT_TEXT }}" /></td>
+                    <td id="toggleSmileyList"></td>
+                </tr>
+            </table>
+        </form>
+    </div>
+    <div id="smileyList"></div>
+</div>
+
+<div id="gameStateContainer">
+    <div class="cloudContainer" title="Drag Me!">
+        <div class="cloudMain"></div>
+        <div class="cloudCenter"></div>
+        <div class="cloudLeft"></div>
+        <div id="gameState">Welcome to Dixit!<br />Change your user name in the top-right corner. Then create or join a game!</div>
+    </div>
+</div>
+
+<div id="gameBoard">
+    <div id="scoreBoardContainer">
+        <table id="scoreBoard" cellspacing="0" cellpadding="0" border="0">
+        </table>
+    </div>
+
+    <div id="bunnyPalette">
+        <h1>Select a colour</h1>
+        <table cellpadding="0" cellspacing="0" border="0">
+            {% for row in ((display.BunnyPalette.RED, display.BunnyPalette.ORANGE, display.BunnyPalette.YELLOW), (display.BunnyPalette.GREEN, display.BunnyPalette.BLUE, display.BunnyPalette.PURPLE), (display.BunnyPalette.PINK, display.BunnyPalette.WHITE, display.BunnyPalette.BLACK)) %}
+            <tr>
+            {% for colour in row %}
+            <td><div class="joinGame bunnyPicker" id="{{ colour }}" style="background-color:#{{ colour }}"><img src="{{ display.Images.BUNNY_READY }}" /></div></td>
+            {% end %}
+            </tr>
+            {% end %}
+        </table>
+    </div>
+
+    <div id="startGameContainer">
+        <form id="startGame" style="display:none">
+            <button type="submit" id="startButton">Start Game</button>
+        </form>
+    </div>
+
+    <pre id="clue">
+    </pre>
+
+    <div id="cards" class="centered">
+    </div>
+
+    <div id="handContainer">
+        <div class="toggleHand centered" id="showHand">^</div>
+        <div class="toggleHand centered" id="hideHand">v</div>
+        <div id="hand" class="centered"></div>
+    </div>
+
+    <div id="actionBox">
+        <form id="actionForm">
+            <textarea id="actionClue" name="clue" cols="40" rows="4" minlength="{{ limits.MIN_CLUE_LENGTH }}">Enter clue here</textarea>
+            <div>
+                <input id="cardId" type="hidden" name="cid" value="" />
+                <input id="actionOk" type="submit" value="Ok" /> <button id="actionCancel">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% end %}

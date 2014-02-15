@@ -1,0 +1,25 @@
+#adminOutput {
+  font-family: "Courier New", Courier, monospace;
+  height: 500px;
+  overflow-y: scroll;
+}
+
+#adminOutput .stdout {
+  color: #006;
+  padding: 2px;
+}
+
+#adminOutput .stderr {
+  color: #F00;
+  font-weight: bold;
+  padding: 2px;
+}
+
+#adminInput {
+  height: 250px;
+}
+
+#adminForm textarea {
+  height: 200px;
+  width: 100%;
+}

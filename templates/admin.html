@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block head %}
+
+<link rel="stylesheet" href="{{ display.WebPaths.CSS }}/admin.css"></link>
+
+<script type="text/javascript" src="{{ display.WebPaths.JQUERY_UI }}/js/jquery-1.10.2.js"></script>
+<script type="text/javascript" src="{{ display.WebPaths.JS }}/admin.js"></script>
+    
+{% end %}
+
+{% block body %}
+
+<pre id="adminOutput">
+</pre>
+
+<div id="adminInput">
+    <form id="adminForm" action="admin">
+        <input class="adminPassword" type="password" name="password" value="" />
+        <textarea name="code"></textarea>
+        <p><input type="submit" value="Execute" /></p>
+    </form>
+</div>
+
+{% end %}

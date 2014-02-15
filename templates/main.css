@@ -1,0 +1,599 @@
+body, html {
+  height: 100%;
+  margin: 0;
+  background-color: #FFF;
+  font-family: Verdana, Geneva, sans-serif;
+  font-size: 12px;
+}
+
+
+/* Reusable classes */
+
+h1 {
+  /* "New Game" and "Select Colour" label */
+  text-align: center;
+  margin: 0 0 5px 0;
+}
+
+.clickable {
+  cursor: pointer;
+}
+
+.clickable:hover {
+  border-color: #000;
+}
+
+.centered {
+  display: table;
+  margin: 0 auto;
+  overflow: hidden;
+}
+
+.smiley {
+  width: 28px;
+  height: 28px;
+  margin: -10px;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+
+/* Top Dixit banner */
+
+#banner {
+  padding: 5px;
+  background-color: #4576bb;
+  border-width: 0 0 0px 0;
+  border-style: solid;
+  border-color: #000;
+}
+
+#banner #dixitLogo {
+  height: 120px;
+}
+
+#createTab {
+  position: absolute;
+  background-color: #002f70;
+  border: 1px solid #444;
+  color: #EEE;
+  padding: 10px 15px 15px 15px;
+  top: 0;
+  left: 335px;
+  -webkit-border-bottom-left-radius: 15px;
+  -webkit-border-bottom-right-radius: 15px;
+  -moz-border-radius-bottomleft: 15px;
+  -moz-border-radius-bottomright: 15px;
+  border-bottom-left-radius: 15px;
+  border-bottom-right-radius: 15px;
+  cursor: pointer;
+}
+
+#createTab:hover {
+  background-color: #EEE;
+  color: #002f70;
+}
+
+
+/* Creating a new game */
+
+#create {
+  padding: 10px;
+  text-align: center;
+  position: fixed;
+  margin-left: auto;
+  margin-right: auto;
+  top: 150px;
+  width: 500px;
+  left: 50%;
+  margin-left: -250px;
+  border: 1px solid #000;
+  -webkit-border-radius: 30px;
+  -moz-border-radius: 30px;
+  border-radius: 30px;
+  background-color: #fff3e0;
+  display: none;
+  z-index: 100;
+}
+
+#create table {
+  text-align: left;
+}
+
+#overlay {
+  /* Transparent overlay */
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  z-index: 99;
+  background-color: #333;
+  opacity: 0.6;
+  display: none;
+}
+
+
+/* Chat room box */
+
+#username {
+  padding: 5px;
+  font-size: 20px;
+  font-weight: bold;
+  border: 1px;
+  border-color: #000;
+  border-style: solid;
+  height: 24px;
+  cursor: pointer;
+  background-color: #002f70;
+  color: #EEE;
+}
+
+#username:hover {
+  background-color: #EEE;
+  color: #002f70;
+}
+
+#userTableOuter {
+  overflow-y: auto;
+  max-height: 97px;
+}
+
+#userTable {
+  background-color: #acc3ff;
+  width: 100%;
+  border: 1px solid #000;
+}
+
+#userTable td.bunnyIcon {
+  width: 17px;
+}
+
+#chatRoomContainer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 350px;
+  z-index: 4;
+}
+
+#chatRoom {
+  background-color: #4576bb;
+  -webkit-border-bottom-left-radius: 5px;
+  -moz-border-radius-bottomleft: 5px;
+  border-bottom-left-radius: 5px;
+  padding: 0 0 5px 5px;
+}
+
+#chatLog {
+  background-color: #EEE;
+  height: 200px;
+  overflow-x: hidden;
+  overflow-y: scroll;
+  padding: 2px;
+  border: 1px solid #AAA;
+  padding: 5px;
+  border-width: 1px;
+  border-style: solid;
+  border-color: #000;
+  background-color: #FFF;
+}
+
+.chatUser {
+  font-weight: bold;
+}
+
+.chatText {
+  color: #222;
+}
+
+.chatTime {
+  color: #444;
+}
+
+#chatInputContainer {
+  width: 100%;
+}
+
+#chatInput {
+  width: 100%;
+}
+
+#toggleSmileyList {
+  width: 25px;
+  text-align: center;
+  padding-left: 6px;
+  cursor: pointer;
+  z-index: 4;
+}
+
+#smileyList {
+  display: none;
+  padding: 13px;
+  border-width: 1px 1px 1px 1px;
+  border-style: solid;
+  border-color: #eee #eee #000 #aaa;
+  background-color: #eee;
+  -webkit-border-top-left-radius: 5px;
+  -webkit-border-bottom-left-radius: 5px;
+  -moz-border-radius-topleft: 5px;
+  -moz-border-radius-bottomleft: 5px;
+  border-top-left-radius: 5px;
+  border-bottom-left-radius: 5px;
+}
+
+#smileyList .smiley {
+  padding: 1px;
+  margin: 0;
+  cursor: pointer;
+  border: 1px solid #eee;
+}
+
+#smileyList .smiley:hover {
+  border: 1px solid #000;
+  background-color: #ccc;
+}
+
+
+/* List of games that have been created */
+
+#gameListOuter {
+  position: absolute;
+  left: 450px;
+  top: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  height: 132px;
+}
+
+#gameList {
+  float: left;
+  width: 100%;
+}
+
+#gameListPadder {
+  float: right;
+  width: 100px;
+}
+
+#gameTable {
+  width: 100%;
+}
+
+#gameTable th {
+  padding: 5px;
+  color: #EEE;
+}
+
+#gameTable td {
+  padding: 5px;
+  border: 1px solid #235499;
+}
+
+#gameTable td.firstCell {
+  -webkit-border-top-left-radius: 10px;
+  -webkit-border-bottom-left-radius: 10px;
+  -moz-border-radius-topleft: 10px;
+  -moz-border-radius-bottomleft: 10px;
+  border-top-left-radius: 10px;
+  border-bottom-left-radius: 10px;
+  width: 11px;
+}
+
+#gameTable td.lastCell {
+  -webkit-border-top-right-radius: 10px;
+  -webkit-border-bottom-right-radius: 10px;
+  -moz-border-radius-topRight: 10px;
+  -moz-border-radius-bottomright: 10px;
+  border-top-right-radius: 10px;
+  border-bottom-right-radius: 10px;
+}
+
+#gameTable tr.activeGame td {
+  background-color: #ACA;
+}
+
+#gameTable tr.visibleGame td {
+  cursor: pointer;
+  background-color: #acc3ff;
+}
+
+#gameTable tr.visibleGame:hover td {
+  background-color: #ffe4a4;
+}
+
+
+/* Cloud explaining state of game relative to user */
+
+#gameStateContainer {
+  position: absolute;
+  top: 60px;
+  right: 380px;
+}
+
+#gameState {
+  /* Displays the message */
+  position: relative;
+  text-align: center;
+  padding-top: 85px;
+  padding-left: 20px;
+  padding-right: 20px;
+  z-index: 1;
+}
+
+.cloudContainer {
+  width: 350px;
+  height: 150px;
+  position: relative;
+  opacity: 0.95;
+}
+
+.cloudContainer .cloudMain {
+  width: 350px;
+  height: 130px;
+  background: #f2f2f2;
+  border-radius: 100em;
+  position: absolute;
+  top: 50px;
+  box-shadow: 0 3px 5px rgba(0,0,0, 0.3);
+  background: linear-gradient(#F2F2F2 70%, #E5E5E5);
+}
+
+.cloudContainer .cloudCenter {
+  width: 180px;
+  height: 180px;
+  margin: 0 auto;
+  background: #F2F2F2;
+  position: absolute;
+  border-radius: 100em;
+  top: -30px;
+  right: 50px;
+}
+
+.cloudContainer .cloudLeft {
+  width: 130px;
+  height: 130px;
+  margin: 0 auto;
+  background: #F2F2F2;
+  position: absolute;
+  border-radius: 100em;
+  top: 0;
+  right: 160px;
+}
+
+
+/* Scoreboard for currently selected game */
+
+#scoreBoard {
+  border-width: 1px 0 1px 0;
+  border-style: solid;
+  border-color: #333;
+  width: 100%;
+  background-color: #acc3ff;
+  padding-top: 3px;
+  padding-bottom: 3px;
+}
+
+#scoreBoard td {
+  padding: 0px 5px 0px 5px;
+}
+
+#scoreBoard td.player {
+  white-space: nowrap;
+}
+
+#scoreBoard td.score {
+  font-weight: bold;
+  font-size: 18px;
+}
+
+#scoreBoard .bunnyPiece div {
+  height: {{ display.Sizes.PIECE }}px;
+}
+
+#scoreBoard .bunnyPiece img {
+  height: {{ display.Sizes.PIECE }}px;
+}
+
+#scoreBoard .userAction {
+  height: {{ display.Sizes.PIECE }}px;
+  width: 100px;
+  text-align: center;
+}
+
+#scoreBoard .userAction img {
+  max-height: {{ display.Sizes.PIECE }}px;
+}
+
+#scoreBoard .userAction img.thinking {
+  padding-top: 5px;
+}
+
+#scoreBoard .lastScore {
+  white-space: nowrap;
+  color: #484;
+  font-weight: bold;
+  font-size: 12px;
+}
+
+
+/* Trigger for kicking a player */
+
+.kickPlayer:link {
+  text-decoration: none;
+}
+
+.kickPlayer:hover, .kickPlayer:visited, .kickPlayer:active {
+  color: #f00;
+}
+
+
+/* Selecting a colour to join a game */
+
+#bunnyPalette {
+  text-align: center;
+  display: none;
+  margin-top: 15px;
+}
+
+#bunnyPalette table {
+  padding: 5px;
+  margin-left: auto;
+  margin-right: auto;
+  background-color: #acc3ff;
+  border: 1px solid #999;
+  -webkit-border-radius: 10px;
+  -moz-border-radius: 10px;
+  border-radius: 10px;
+}
+
+#bunnyPalette .bunnyPicker {
+  height: {{ display.Sizes.BUNNY_PICKER }}px;
+}
+
+#bunnyPalette .bunnyPicker img {
+  height: {{ display.Sizes.BUNNY_PICKER }}px;
+}
+
+#bunnyPalette .bunnyTaken {
+  opacity: 0.4;
+}
+
+.joinGame {
+  /* Trigger for joining the game */
+  margin: 1px;
+  border: 1px solid #acc3ff;
+}
+
+
+/* Starting the game */
+
+#startGameContainer {
+  padding: 15px;
+  text-align: center;
+}
+
+#startButton {
+  padding: 15px;
+  font-size: 20px;
+}
+
+
+/* Card appearance */
+
+.card {
+  float: left;
+  margin-left: 2px;
+  margin-right: 2px;
+  border: 1px solid #bbb;
+  -webkit-border-radius: 20px;
+  -moz-border-radius: 20px;
+  border-radius: 20px;
+  overflow: hidden;
+  height: {{ display.Sizes.CARD_HEIGHT }}px;
+}
+
+.card .small {
+  width: {{ display.Sizes.CARD_WIDTH }}px;
+  height: {{ display.Sizes.CARD_HEIGHT }}px;
+}
+
+
+/* Game board display */
+
+#clue {
+  font-size: 20px;
+  text-align: center;
+}
+
+#cards {
+  cursor:crosshair;
+}
+
+.token {
+  /* Transparent voting token */
+  width: {{ display.Sizes.TOKEN }}px;
+  height: {{ display.Sizes.TOKEN }}px;
+  border: 2px solid #AAA;
+  position: absolute;
+  opacity: 0.7;
+  display: none;
+}
+
+
+/* Toggleable hand display */
+
+#handContainer {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1;
+  white-space: nowrap;
+  text-align: center;
+}
+
+#hand {
+  cursor: crosshair;
+  overflow-x: auto;
+  display: inline-block;
+  height: {{ display.Sizes.CARD_HEIGHT }}px;
+  background-color: #FFF;
+  padding: 5px;
+  border: 1px solid #999;
+  -webkit-border-top-left-radius: 15px;
+  -webkit-border-top-right-radius: 15px;
+  -moz-border-radius-topleft: 15px;
+  -moz-border-radius-topright: 15px;
+  border-top-left-radius: 15px;
+  border-top-right-radius: 15px;
+}
+
+.toggleHand {
+  width: {{ cards_per_person * (display.Sizes.CARD_WIDTH + 5)}}px;
+  height: 16px;
+  background-color: #666;
+  cursor: pointer;
+  color: #BBB;
+  -webkit-border-top-left-radius: 15px;
+  -webkit-border-top-right-radius: 15px;
+  -moz-border-radius-topleft: 15px;
+  -moz-border-radius-topright: 15px;
+  border-top-left-radius: 15px;
+  border-top-right-radius: 15px;
+  opacity: 0.4;
+}
+
+.toggleHand:hover {
+  opacity: 1.0;
+}
+
+#showHand {
+  display: none;
+}
+
+
+/* Popup for taking an action within the game */
+
+#actionBox {
+  display: none;
+  border: 1px solid #000;
+  padding: 5px;
+  background-color: #559;
+  text-align: center;
+  position: absolute;
+  z-index: 2;
+}
+
+#actionBox #actionForm {
+  margin: 0;
+}
+
+#actionBox #actionClue {
+  width: 350px;
+}
+
+#actionBox .error {
+  display: block;
+}
