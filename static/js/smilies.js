@@ -1,6 +1,6 @@
 // Dictionary of unescaped ASCII code to smiley image filename
 var smileys = {
-    ':)' : 'smile',
+    ':)' : 'Smile',
     ':d' : 'Big-Grin',
     '(lol)' : 'Laughing',
     ':p' : 'Tongue',
