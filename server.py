@@ -78,32 +78,6 @@ class MainCSSHandler(tornado.web.RequestHandler):
             cards_per_person=Game.CARDS_PER_PERSON)
 
 
-class AdminHandler(RequestHandler):
-    """Handler for executing arbitrary code on the server in real time."""
-
-    def get(self):
-        self.render('admin.html', display=display)
-
-    def post(self):
-        admin_password = hash_obj(self.get_argument('password'))
-        if admin_password != self.application.admin_password:
-            stdout = ''
-            stderr = 'Invalid password'
-        else:
-            try:
-                with capture_stdout() as stdout_context:
-                    exec self.get_argument('code').replace('\r', '')
-                stdout = stdout_context.getvalue()
-                stderr = ''
-            except Exception as exc:
-                stdout = ''
-                stderr = unicode(exc).encode('utf-8')
-        self.write({
-            'stdout' : stdout,
-            'stderr' : stderr,
-        })
-
-
 class SetUsernameHandler(RequestHandler):
     """Handler for changing your own username."""
 
@@ -353,7 +327,6 @@ class Application(tornado.web.Application):
         # Specifies where to find all the card images for each set.
         self.card_sets = [CardSet(name, find_cards(folder), enabled)
             for name, (folder, enabled) in kwargs['card_sets'].iteritems()]
-        self.admin_password = kwargs['admin_password']
 
         super(Application, self).__init__(*args, **kwargs)
 
@@ -369,7 +342,6 @@ settings.update(config.parse(configFilename))
 
 application = Application([
     (r'/', MainHandler),
-    (r'/admin', AdminHandler),
     (r'/main.js', MainJSHandler),
     (r'/main.css', MainCSSHandler),
     (r'/setusername', SetUsernameHandler),
