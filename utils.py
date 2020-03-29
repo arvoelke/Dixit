@@ -4,7 +4,7 @@ import contextlib
 import hashlib
 import random
 import sys
-import StringIO
+import io
 
 INFINITY = 1e9
 SALT = '1c(R$p{Gsjk/5'
@@ -42,7 +42,7 @@ def capture_stdout(stdout=None):
     """Usage: with capture_stdout() as s:...; s.getValue()"""
     oldout = sys.stdout
     if stdout is None:
-        stdout = StringIO.StringIO()
+        stdout = io.StringIO()
     sys.stdout = stdout
     yield stdout
     sys.stdout = oldout

@@ -38,7 +38,7 @@ class Users(object):
 
     def __iter__(self):
         """Iterates over all User objects."""
-        return self.users.itervalues()
+        return iter(self.users.values())
 
     def has_user(self, uid):
         """Returns true iff there exists a User with the given private uid."""
