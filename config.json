@@ -6,5 +6,5 @@
     "card_sets" : {
         // <name-of-card-set> : [static/cards/<folder>, <is-default-checked>]
         "Dixit" : ["dixit", true]
-    },
+    }
 }
