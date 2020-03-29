@@ -96,7 +96,7 @@ class AdminHandler(RequestHandler):
         else:
             try:
                 with capture_stdout() as stdout_context:
-                    exec self.get_argument('code').replace('\r', '')
+                    exec(self.get_argument('code').replace('\r', ''))
                 stdout = stdout_context.getvalue()
                 stderr = ''
             except Exception as exc:
@@ -122,7 +122,7 @@ class CreateHandler(RequestHandler):
 
     def post(self):
         try:
-            card_set_indices = map(int, self.request.arguments['card_sets'])
+            card_set_indices = list(map(int, self.request.arguments['card_sets']))
         except ValueError as exc:
             raise APIError(Codes.NOT_AN_INTEGER, exc)
         if min(card_set_indices) < 0 or \
@@ -176,7 +176,7 @@ class GetGamesHandler(RequestHandler):
                 'state' : game.state,
                 'left' : game.deck.left(),
                 'size' : game.deck.size(),
-                'topScore' : max(p.score for p in game.players.values()) \
+                'topScore' : max(p.score for p in list(game.players.values())) \
                     if game.players else 0,
                 'maxScore' : game.max_score \
                     if game.max_score != INFINITY else None,
@@ -266,7 +266,7 @@ class GameHandler(RequestHandler):
     def _get_board(cls, user, game):
         """Returns a JSON dictionary summarizing the entire game board."""
         players = dict((u.puid, u.name) for u in game.players)
-        scores = dict((u.puid, p.score) for u, p in game.players.items())
+        scores = dict((u.puid, p.score) for u, p in list(game.players.items()))
         is_player = user in game.players
 
         requires_action = {}
@@ -280,7 +280,7 @@ class GameHandler(RequestHandler):
                 States.END: False,  # game.host == u,
             }[game.state]
 
-        puids = players.keys()
+        puids = list(players.keys())
         ranked = get_sorted_positions(puids, key=lambda puid: scores[puid])
 
         rnd = {}
@@ -290,16 +290,16 @@ class GameHandler(RequestHandler):
             rnd['cardsHash'] = hash_obj(rnd['cards'])
         if game.round.has_everyone_voted():
             rnd['votes'] = dict((u.puid, card.cid)
-                for u, card in game.round.user_to_vote.items())
+                for u, card in list(game.round.user_to_vote.items()))
             rnd['owners'] = dict((u.puid, card.cid)
-                for u, card in game.round.user_to_card.items())
+                for u, card in list(game.round.user_to_card.items()))
             rnd['votesHash'] = hash_obj(rnd['votes'])
         if game.round.clue:
             rnd['clue'] = str(game.round.clue)
         if game.round.clue_maker:
             rnd['clueMaker'] = game.round.clue_maker.puid
         rnd['scores'] = dict((u.puid, score)
-            for u, score in game.round.scores.items() if score > 0)
+            for u, score in list(game.round.scores.items()) if score > 0)
 
         plr = {}
         if is_player and game.players[user].hand:
@@ -311,7 +311,7 @@ class GameHandler(RequestHandler):
             'user' : user.puid,
             'host' : game.host.puid,
             'players' : players,
-            'colours' : dict((u.puid, col) for u, col in game.colours.items()),
+            'colours' : dict((u.puid, col) for u, col in list(game.colours.items())),
             'isHost' : user == game.host,
             'isPlayer' : user in game.players,
             'maxPlayers' : game.max_players,
@@ -356,7 +356,7 @@ class Application(tornado.web.Application):
 
         # Specifies where to find all the card images for each set.
         self.card_sets = [CardSet(name, find_cards(folder), enabled)
-            for name, (folder, enabled) in kwargs['card_sets'].iteritems()]
+            for name, (folder, enabled) in kwargs['card_sets'].items()]
         self.admin_password = kwargs['admin_password']
         self.admin_enable = kwargs['admin_enable']
 
@@ -369,7 +369,7 @@ settings = {
     'debug' : False,
 }
 
-configFilename = (sys.argv + ['config.json'])[1]
+configFilename = "config.json"
 settings.update(config.parse(configFilename))
 
 application = Application([

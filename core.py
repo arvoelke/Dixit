@@ -46,7 +46,7 @@ class StringClue(object):
         self.clue = clue
 
     def __str__(self):
-        return self.clue.encode('utf-8')
+        return self.clue
 
     def __len__(self):
         return len(self.clue)
@@ -89,7 +89,7 @@ class Round(object):
         self.scores = defaultdict(int)  # User -> int
 
         # Determine the random card order ahead of time
-        self.card_index_to_user = players.keys()
+        self.card_index_to_user = list(players.keys())
         random.shuffle(self.card_index_to_user)
 
     @classmethod
@@ -111,15 +111,15 @@ class Round(object):
 
     def has_card(self, card):
         """Returns true iff the card has been played."""
-        return card in self.user_to_card.itervalues()
+        return card in iter(self.user_to_card.values())
 
     def has_played(self, user):
         """Returns true iff the user has already played a card this round."""
-        return self.user_to_card.has_key(user)
+        return user in self.user_to_card
 
     def has_voted(self, user):
         """Returns true iff the user has already voted for a card this round."""
-        return self.user_to_vote.has_key(user)
+        return user in self.user_to_vote
 
     def has_everyone_played(self):
         """Returns true iff every player has_played(...)."""
@@ -193,7 +193,7 @@ class Game(object):
             raise APIError(Codes.JOIN_FULL_ROOM)
         if not BunnyPalette.is_colour(colour):
             raise APIError(Codes.NOT_A_COLOUR, colour)
-        if colour in self.colours.values():
+        if colour in list(self.colours.values()):
             raise APIError(Codes.COLOUR_TAKEN)
         if user in self.perma_banned:
             raise APIError(Codes.JOIN_BANNED)
@@ -297,7 +297,7 @@ class Game(object):
             self.state = States.CLUE
             if self.deck.is_empty():
                 self.state = States.END
-            for p in self.players.itervalues():
+            for p in self.players.values():
                 if p.score >= self.max_score:
                     self.state = States.END
         self.ping()
