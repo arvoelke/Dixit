@@ -82,9 +82,13 @@ class AdminHandler(RequestHandler):
     """Handler for executing arbitrary code on the server in real time."""
 
     def get(self):
+        if not self.application.admin_enable:
+            raise tornado.web.HTTPError(404)
         self.render('admin.html', display=display)
 
     def post(self):
+        if not self.application.admin_enable:
+            raise tornado.web.HTTPError(404)
         admin_password = hash_obj(self.get_argument('password'))
         if admin_password != self.application.admin_password:
             stdout = ''
@@ -354,6 +358,7 @@ class Application(tornado.web.Application):
         self.card_sets = [CardSet(name, find_cards(folder), enabled)
             for name, (folder, enabled) in kwargs['card_sets'].iteritems()]
         self.admin_password = kwargs['admin_password']
+        self.admin_enable = kwargs['admin_enable']
 
         super(Application, self).__init__(*args, **kwargs)
 
@@ -361,7 +366,7 @@ class Application(tornado.web.Application):
 settings = {
     'static_path' : os.path.join(os.path.dirname(__file__), 'static'),
     'template_path' : os.path.join(os.path.dirname(__file__), 'templates'),
-    'debug' : True,
+    'debug' : False,
 }
 
 configFilename = (sys.argv + ['config.json'])[1]
