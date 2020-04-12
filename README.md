@@ -6,6 +6,12 @@
 
 pip install -r requirements.txt
 
-## Starting The Server
+## Configuring the Server
 
-sudo ./run &
+Edit ``config.json`` to specify which port to run on,
+and to point to the location of each card deck
+(see ``static/cards/README.txt``).
+
+## Starting the Server
+
+python server.py
