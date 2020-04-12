@@ -83,7 +83,6 @@ class Round(object):
         self.players = players
         self.clue = clue
         self.clue_maker = clue_maker
-        self.cards = []
         self.user_to_card = dict()  # User -> Card
         self.user_to_vote = dict()  # User -> Card
         self.card_to_voted_users = defaultdict(list)  # Card -> list(User)
