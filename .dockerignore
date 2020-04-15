@@ -1,0 +1,4 @@
+static/cards/*
+**/*.pyc
+Dockerfile
+README.md
