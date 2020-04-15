@@ -15,3 +15,21 @@ and to point to the location of each card deck
 ## Starting the Server
 
 python server.py
+
+## Using Docker
+
+To build the Docker image run:
+
+```
+docker build -t dixit .
+```
+
+which creates a Docker image named `dixit`.
+
+You can then run the image using
+
+```
+docker run -p 8888:8888 -v <cards_folder>:/app/static/cards/dixit dixit
+```
+
+(replace `cards_folder` with the absolute path to a folder containing your cards).
