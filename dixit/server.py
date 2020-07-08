@@ -1,6 +1,6 @@
 """Entry point for running the Dixit server.
 
-Usage: python server.py [config.json]
+Usage: python server.py
 
 See https://github.com/arvoelke/dixit or README.md for more information.
 
@@ -394,8 +394,9 @@ settings = {
     'debug' : False,
 }
 
-configFilename = os.path.join(os.path.dirname(__file__), "config.json")
-settings.update(config.parse(configFilename))
+default_config_filename = os.path.join(os.path.dirname(__file__), 'config.json')
+override_config_filename = os.path.join(os.path.dirname(__file__), 'config.local.json')
+settings.update(config.parse(default_config_filename, override_config_filename))
 
 application = Application([
     (r'/', MainHandler),
