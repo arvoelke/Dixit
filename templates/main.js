@@ -83,7 +83,7 @@ $(document).ready(function() {
         $.getJSON('getgames', function(data) {
             var html = [];
             if (data.length > 0) {
-                html.push('<tr><th>&nbsp;</th><th>Host</th><th>Name</th><th>State</th><th>Players</th><th>Score</th><th>Cards<th><th>&nbsp;</th></tr>');
+                html.push('<tr><th>&nbsp;</th><th>Host</th><th>Name</th><th>State</th><th>Players</th><th>Score</th><th>Cards</th></tr>');
             }
             $.each(data, function(i, game) {
                 html.push('<tr class="' + (game.gid == activeGame ? 'activeGame' : 'visibleGame') + '">');
