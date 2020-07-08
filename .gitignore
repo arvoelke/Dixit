@@ -4,3 +4,4 @@ dixit/static/cards/*
 *.egg-info
 build
 dist
+config.local.json
