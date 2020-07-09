@@ -10,5 +10,25 @@
 
     // utils.hash_obj() of password for /admin/ page
     "admin_password" : "",
-    "admin_enable": false
+    "admin_enable": false,
+
+    // These all need to be ints, -1 for infinity
+    "limits" : {
+        "min_name" : 3,
+        "max_name" : 20,
+
+        "min_players": 3,
+        "max_players": 6,
+
+        "min_score": 1,
+        "max_score": -1,
+
+        "min_clue_length": 5,
+        "max_clue_length": 100000,
+
+        "max_message": 1024,
+
+        "min_user_name" : 3,
+        "max_user_name" : 25
+    }
 }

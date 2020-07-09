@@ -53,7 +53,7 @@ class MainHandler(RequestHandler):
             card_sets=self.application.card_sets,
             display=display,
             user=self.user,
-            limits=Limits)
+            limits=self.application.limits)
 
 
 class MainJSHandler(tornado.web.RequestHandler):
@@ -65,7 +65,7 @@ class MainJSHandler(tornado.web.RequestHandler):
             display=display,
             states=States,
             commands=Commands,
-            limits=Limits)
+            limits=self.application.limits)
 
 
 class MainCSSHandler(tornado.web.RequestHandler):
@@ -147,14 +147,15 @@ class CreateHandler(RequestHandler):
         except ValueError as exc:
             raise APIError(Codes.NOT_AN_INTEGER, exc)
 
-        if (not Limits.MIN_NAME <= len(name) <= Limits.MAX_NAME) or \
-           (not Limits.MIN_PLAYERS <= max_players <= Limits.MAX_PLAYERS) or \
-           (not Limits.MIN_SCORE <= max_score <= Limits.MAX_SCORE) or \
-           (not Limits.MIN_CLUE_LENGTH <= max_clue_length <= Limits.MAX_CLUE_LENGTH):
+        limits = self.application.limits
+        if (not limits.min_name <= len(name) <= limits.max_name) or \
+           (not limits.min_players <= max_players <= limits.max_players) or \
+           (not limits.min_score <= max_score <= limits.max_score) or \
+           (not limits.min_clue_length <= max_clue_length <= limits.max_clue_length):
             raise APIError(Codes.ILLEGAL_RANGE)
 
         game = Game(self.user, card_sets, password, name,
-                    max_players, max_score, max_clue_length)
+                    max_players, max_score, max_clue_length, limits)
         self.application.games.append(game)
         self.write(str(len(self.application.games) - 1))
 
@@ -212,7 +213,7 @@ class ChatHandler(RequestHandler):
         })
 
     def post(self):
-        msg = self.get_argument('msg')[:Limits.MAX_MESSAGE]
+        msg = self.get_argument('msg')[:self.application.limits.max_message]
         self.application.chat_log.add(self.user.name, msg)
 
 
@@ -262,8 +263,7 @@ class GameHandler(RequestHandler):
         else:
             raise APIError(Codes.ILLEGAL_RANGE, cmd)
 
-    @classmethod
-    def _get_board(cls, user, game):
+    def _get_board(self, user, game):
         """Returns a JSON dictionary summarizing the entire game board."""
         players = dict((u.puid, u.name) for u in game.players)
         scores = dict((u.puid, p.score) for u, p in list(game.players.items()))
@@ -273,7 +273,7 @@ class GameHandler(RequestHandler):
         for u in game.players:
             requires_action[u.puid] = {
                 States.BEGIN: game.host == u and \
-                    len(players) >= Limits.MIN_PLAYERS,
+                    len(players) >= self.application.limits.min_players,
                 States.CLUE: game.clue_maker() == u,
                 States.PLAY: not game.round.has_played(u),
                 States.VOTE: not game.round.has_voted(u),
@@ -350,7 +350,9 @@ class Application(tornado.web.Application):
 
     def __init__(self, *args, **kwargs):
         """Initializes the users, games, chat log, and cards."""
-        self.users = Users()
+        self.limits = Limits(kwargs['limits'])
+
+        self.users = Users(self.limits)
         self.games = []
         self.chat_log = ChatLog()
 

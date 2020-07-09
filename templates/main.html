@@ -40,22 +40,22 @@
             <tr>
                 <td><label>Name (optional)</label></td>
                 <td><input type="text" name="name" value=""
-                            minlength="{{ limits.MIN_NAME }}" maxlength="{{ limits.MAX_NAME }}" /></td>
+                            minlength="{{ limits.min_name }}" maxlength="{{ limits.max_name }}" /></td>
             </tr>
             <tr>
                 <td><label>Max Players</label></td>
                 <td><input type="text" name="max_players" value="6"
-                            min="{{ limits.MIN_PLAYERS }}" max="{{ limits.MAX_PLAYERS }}" size="4" required /></td>
+                            min="{{ limits.min_players }}" max="{{ limits.max_players }}" size="4" required /></td>
             </tr>
             <tr>
                 <td><label>Max Score (optional)</label></td>
                 <td><input type="text" name="max_score" value="30"
-                            min="{{ limits.MIN_SCORE }}" max="{{ limits.MAX_SCORE }}" size="4" /></td>
+                            min="{{ limits.min_score }}" max="{{ limits.max_score }}" size="4" /></td>
             </tr>
             <tr>
                 <td><label>Maximum Clue Length</label></td>
                 <td><input type="text" name="max_clue_length" value="1000"
-                            min="{{ limits.MIN_CLUE_LENGTH }}" max="{{ limits.MAX_CLUE_LENGTH }}" size="4" required /></td>
+                            min="{{ limits.min_clue_length }}" max="{{ limits.max_clue_length }}" size="4" required /></td>
             </tr>
             <tr>
                 <td><label>Deck Building</label></td>
@@ -142,7 +142,7 @@
 
     <div id="actionBox">
         <form id="actionForm">
-            <textarea id="actionClue" name="clue" cols="40" rows="4" minlength="{{ limits.MIN_CLUE_LENGTH }}">Enter clue here</textarea>
+            <textarea id="actionClue" name="clue" cols="40" rows="4" minlength="{{ limits.min_clue_length }}">Enter clue here</textarea>
             <div>
                 <input id="cardId" type="hidden" name="cid" value="" />
                 <input id="actionOk" type="submit" value="Ok" /> <button id="actionCancel">Cancel</button>

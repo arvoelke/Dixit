@@ -13,19 +13,34 @@ from utils import INFINITY
 class Limits(object):
     """Static parameter limits for validation."""
 
-    MIN_NAME = 3
-    MAX_NAME = 20
+    def __init__(self, limit_config):
+        self.min_name = self._get_int(limit_config, 'min_name')
+        self.max_name = self._get_int(limit_config, 'max_name')
 
-    MIN_PLAYERS = 3
-    MAX_PLAYERS = 6
+        self.min_players = self._get_int(limit_config, 'min_players')
+        self.max_players = self._get_int(limit_config, 'max_players')
 
-    MIN_SCORE = 1
-    MAX_SCORE = INFINITY
+        self.min_score = self._get_int(limit_config, 'min_score')
+        self.max_score = self._get_int(limit_config, 'max_score')
 
-    MIN_CLUE_LENGTH = 5
-    MAX_CLUE_LENGTH = 100000
+        self.min_clue_length = self._get_int(limit_config, 'min_clue_length')
+        self.max_clue_length = self._get_int(limit_config, 'max_clue_length')
 
-    MAX_MESSAGE = 1024
+        self.max_message = self._get_int(limit_config, 'max_message')
+
+        self.min_user_name = self._get_int(limit_config, 'min_user_name')
+        self.max_user_name = self._get_int(limit_config, 'max_user_name')
+
+    def _get_int(self, limit_config, key):
+        val = limit_config.get(key)
+        if val is None:
+            raise Exception(f"Missing limit configuration: {key}")
+        try:
+            val = int(val)
+        except ValueError:
+            raise Exception(f"Limit configuration is invalid: {key}={val}")
+
+        return INFINITY if val == -1 else val
 
 
 class States(object):
@@ -148,7 +163,7 @@ class Game(object):
     SCORE_FOR_CORRECT = 3
 
     def __init__(self, host, card_sets, password, name, max_players,
-                 max_score, max_clue_length):
+                 max_score, max_clue_length, limits):
         """Initializes the game with the parameters from CreateHandler."""
         self.host = host
         self.deck = Deck(card_sets)
@@ -162,6 +177,8 @@ class Game(object):
         self.order = []
         self.colours = dict()
         self.perma_banned = set()
+
+        self.limits = limits
 
         self.init_game()
         self.ping()
@@ -206,7 +223,7 @@ class Game(object):
         """Kicks a user from the game, or throws APIError."""
         if not user in self.players:
             raise APIError(Codes.KICK_UNKNOWN_USER)
-        if len(self.players) <= Limits.MIN_PLAYERS and \
+        if len(self.players) <= self.limits.min_players and \
            self.state != States.BEGIN:
             raise APIError(Codes.NOT_ENOUGH_PLAYERS)
         if self.state in (States.PLAY, States.VOTE):
@@ -225,7 +242,7 @@ class Game(object):
         """Transitions from BEGIN to CLUE, or throws APIError."""
         if self.state != States.BEGIN:
             raise APIError(Codes.BEGIN_BAD_STATE)
-        if len(self.players) < Limits.MIN_PLAYERS:
+        if len(self.players) < self.limits.min_players:
             raise APIError(Codes.NOT_ENOUGH_PLAYERS)
         random.shuffle(self.order)
         for user in self.players:
@@ -244,7 +261,7 @@ class Game(object):
             raise APIError(Codes.CLUE_BAD_STATE)
         if user != self.clue_maker():
             raise APIError(Codes.CLUE_NOT_TURN)
-        if len(clue) < Limits.MIN_CLUE_LENGTH:
+        if len(clue) < self.limits.min_clue_length:
             raise APIError(Codes.CLUE_TOO_SHORT)
         if len(clue) > self.max_clue_length:
             raise APIError(Codes.CLUE_TOO_LONG)
