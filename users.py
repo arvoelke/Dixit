@@ -6,11 +6,10 @@ import time
 class User(object):
     """Data for one user across multiple games."""
 
-    MIN_NAME = 3
-    MAX_NAME = 25
-
-    def __init__(self, uid, puid):
+    def __init__(self, limits, uid, puid):
         """Creates a new user with the given uid (private) and puid (public)."""
+        self.limits = limits
+
         self.uid = uid  # this id should never be exposed to the user
         self.puid = puid  # this id is exposed to all users
 
@@ -23,18 +22,19 @@ class User(object):
 
     def set_name(self, name):
         """Modifies the user's name."""
-        if len(name) >= self.MIN_NAME:
-            self.name = name[:self.MAX_NAME]
+        if len(name) >= self.limits.min_user_name:
+            self.name = name[:self.limits.max_user_name]
         return self.name
 
 
 class Users(object):
     """Data for all users."""
 
-    def __init__(self):
+    def __init__(self, limits):
         """Initializes an empty data structure."""
         self.users = {}
         self.users_by_puid = {}
+        self.limits = limits
 
     def __iter__(self):
         """Iterates over all User objects."""
@@ -54,7 +54,7 @@ class Users(object):
 
     def add_user(self, uid, puid):
         """Adds and returns a new user with a given private uid and puid."""
-        user = User(uid, puid)
+        user = User(self.limits, uid, puid)
         self.users[uid] = user
         self.users_by_puid[puid] = user
         return user

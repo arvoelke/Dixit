@@ -242,7 +242,7 @@ $(document).ready(function() {
 
                 // Name of player and option to kick them if host
                 var canKick = data.isHost
-                           && (data.state == {{ states.BEGIN }} || numPlayers > {{ limits.MIN_PLAYERS }})
+                           && (data.state == {{ states.BEGIN }} || numPlayers > {{ limits.min_players }})
                            && data.state != {{ states.PLAY }}
                            && data.state != {{ states.VOTE }};
                 scoreBoard.push('<td class="player">'
@@ -304,7 +304,7 @@ $(document).ready(function() {
             }
             $('#joinGame').toggle();
             $('#startGame').toggle(data.state == {{ states.BEGIN }} && data.isHost
-                                && numPlayers >= {{ limits.MIN_PLAYERS }});
+                                && numPlayers >= {{ limits.min_players }});
 
             // Game configuration dependent stuff
             $('#clueTextarea').attr('maxlength', data.maxClueLength);
