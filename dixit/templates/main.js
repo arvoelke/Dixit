@@ -26,6 +26,7 @@ actionMessages[{{ states.CLUE }}] = 'Create a clue.<br />You can show/hide your 
 actionMessages[{{ states.PLAY }}] = 'Select the best card for the following clue.';
 actionMessages[{{ states.VOTE }}] = 'Vote for the card you think was selected by the clue maker, given their clue.';
 actionMessages[{{ states.END }}] = 'Play again?';
+var hideGameTitle = 'Hide game';
 
 
 // Summary of game state for a player who needs to wait
@@ -81,31 +82,44 @@ $(document).ready(function() {
     // Periodic Game List Polling
     var gameListWorker = function worker() {
         $.getJSON('getgames', function(data) {
-            var html = [];
+            var rows = [];
             if (data.length > 0) {
-                html.push('<tr><th>&nbsp;</th><th>Host</th><th>Name</th><th>State</th><th>Players</th><th>Score</th><th>Cards</th></tr>');
+                rows.push($('<tr><th>&nbsp;</th><th>Host</th><th>Name</th><th>State</th><th>Players</th><th>Score</th><th>Cards</th><th>Actions</th></tr>'));
             }
             $.each(data, function(i, game) {
-                html.push('<tr class="' + (game.gid == activeGame ? 'activeGame' : 'visibleGame') + '">');
-                html.push('<td class="firstCell">' + activityIcon(game.relLastActive) + '</td>');
-                html.push('<td><input type="hidden" name="gid" value="' + game.gid + '" />'
-                        + smilify(game.host) + '</td>');
-                html.push('<td>' + smilify(game.name) + '</td>');
-                html.push('<td>' + observerMessages[game.state] + '</td>');
-                html.push('<td title="' + textToHtml(game.players.join(', ')) + '">'
-                        + game.players.length
-                        + (game.state == {{ states.BEGIN }} ? ' / ' + game.maxPlayers : '') + '</td>');
-                html.push('<td>' + game.topScore + (game.maxScore ? ' / ' + game.maxScore : '') + '</td>');
-                html.push('<td class="lastCell" title="' + game.deckName + '">'
-                        + game.left + ' / ' + game.size + '</td>');
-                html.push('</tr>');
+                var row = $('<tr>')
+                    .addClass((game.gid == activeGame ? 'activeGame' : 'visibleGame'))
+                    .data('gid', game.gid)
+                    .data('name', game.name);
+                row.append($('<td>').addClass('firstCell').html(activityIcon(game.relLastActive)));
+                row.append($('<td>').html(smilify(game.host)));
+                row.append($('<td>').html(smilify(game.name)));
+                row.append($('<td>').text(observerMessages[game.state]));
+                row.append($('<td>').attr('title', game.players.join(', ')).text(game.players.length
+                        + (game.state == {{ states.BEGIN }} ? ' / ' + game.maxPlayers : '')))
+                row.append($('<td>').text(game.topScore + (game.maxScore ? ' / ' + game.maxScore : '')));
+
+                row.append($('<td>').attr('title', game.deckName).text(game.left + ' / ' + game.size));
+                var actionCell = $('<td>'.addClass('lastCell'));
+                if (game.isHost) {
+                    actionCell.append($('<button>').addClass('hide').attr('title', hideGameTitle).text('X'));
+                }
+                row.append(actionCell);
+                rows.push(row);
             });
-            $('#gameTable').html(html.join(''));
+            $('#gameTable').empty().append(rows);
 
             // Register handlers for elements that have been added dynamically
             $('#gameTable button').button();
-            $('.visibleGame').click(function(e) {
-                gid = $(this).find('input').val();
+
+            $('.hide').click(function(e) {
+                var gid = $(this).parent().parent().data('gid');
+                var name = $(this).parent().parent().data('name');
+                openHide(gid, name);
+                e.preventDefault();
+            });
+            $('.visibleGame td:not(.lastCell)').click(function(e) {
+                gid = $(this).parent().data('gid');
                 switchGame(gid);
                 e.preventDefault();
             });
@@ -508,6 +522,38 @@ $(document).ready(function() {
     $('#createForm').validate();
 
 
+    // Hide a game
+    function openHide(gid, name) {
+        $('#overlay').show();
+        $('#hideGid').val(gid);
+        $('#hideName').html(smilify(name));
+        $('#hide').show();
+    }
+    function closeHide(e) {
+        $('#overlay').hide();
+        $('#hide').hide();
+        $('#hideGid').val('');
+        $('#hideName').html('');
+        e.preventDefault();
+    }
+    $('#overlay').click(closeHide);
+    $('#cancelHide').click(closeHide);
+    $('#hideForm').submit(function(e) {
+        if (!$(this).valid()) {
+            return e.preventDefault();
+        }
+        $.post($(this).attr('action'), $(this).serialize(), function(response) {
+            hidGame = $('#hideGid').val();
+            if (hidGame == activeGame) {
+                document.location.href = '';
+            } else {
+                closeHide(e);
+            }
+        }, 'json');
+        e.preventDefault();
+    });
+
+
     // Switch current game
     function switchGame(gid) {
         activeGame = gid;
@@ -565,6 +611,7 @@ $(document).ready(function() {
     $('button').button();
     $('#actionOk').button();
     $('#createOk').button();
+    $('#hideOk').button();
     $('#gameStateContainer').draggable();
 
 
