@@ -74,6 +74,18 @@
     </form>
 </div>
 
+<div id="hide">
+    <h1>{{ display.Labels.HIDE_GAME }}</h1>
+    <form id="hideForm" action="hide" method="post">
+        <input type="hidden" id="hideGid" name="gid" />
+        <p>Sure you want to hide the game "<span id="hideName"></span>"?</p>
+        <p><strong>There's no way to unhide!</strong></p>
+
+        <input type="submit" id="hideOk" value="Hide" class="ui-state-error" />
+        <button id="cancelHide">Cancel</button>
+    </form>
+</div>
+
 <div id="chatRoomContainer">
     <div id="chatRoom">
         <div id="username">{{ user.name }}</div>

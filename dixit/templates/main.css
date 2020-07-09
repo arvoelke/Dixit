@@ -75,9 +75,9 @@ h1 {
 }
 
 
-/* Creating a new game */
+/* Creating / hiding a game */
 
-#create {
+#create, #hide {
   padding: 10px;
   text-align: center;
   position: fixed;
@@ -287,6 +287,7 @@ h1 {
   -moz-border-radius-bottomright: 10px;
   border-top-right-radius: 10px;
   border-bottom-right-radius: 10px;
+  text-align: center;
 }
 
 #gameTable tr.activeGame td {

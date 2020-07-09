@@ -160,14 +160,34 @@ class CreateHandler(RequestHandler):
         self.write(str(len(self.application.games) - 1))
 
 
+class HideHandler(RequestHandler):
+    """Handler for deleting a game."""
+
+    def post(self):
+        try:
+            gid = int(self.get_argument('gid'))
+        except ValueError as exc:
+            raise APIError(Codes.NOT_AN_INTEGER, exc)
+
+        try:
+            game = self.application.games[gid]
+        except IndexError:
+            raise APIError(Codes.ILLEGAL_RANGE)
+
+        if self.user != game.host:
+            raise APIError(Codes.ILLEGAL_RANGE)
+
+        self.application.games[gid].hide()
+        self.write(json.dumps('ok'))
+
+
 class GetGamesHandler(RequestHandler):
     """Handler for getting the list of all games."""
 
     def get(self):
-        blob = []
         cur_time = time.time()
-        for gid, game in enumerate(self.application.games):
-            blob.append({
+        blob = [
+            {
                 'gid' : gid,
                 'name' : game.name,
                 'relLastActive' : cur_time - game.last_active,
@@ -184,7 +204,10 @@ class GetGamesHandler(RequestHandler):
                 'deckName' : game.deck.name,
                 'isHost' : self.user == game.host,
                 'isPlayer' : self.user in game.players,
-            })
+            }
+            for gid, game in enumerate(self.application.games)
+            if not game.hidden
+        ]
         self.write(json.dumps(sorted(blob, key=lambda x: x['relLastActive'])))
 
 
@@ -381,6 +404,7 @@ application = Application([
     (r'/main.css', MainCSSHandler),
     (r'/setusername', SetUsernameHandler),
     (r'/create', CreateHandler),
+    (r'/hide', HideHandler),
     (r'/getgames', GetGamesHandler),
     (r'/getusers', GetUsersHandler),
     (r'/game/([0-9]+)/(.+)', GameHandler),

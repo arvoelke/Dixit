@@ -8,6 +8,7 @@ class Labels(object):
 
     TITLE = 'Dixit'
     NEW_GAME = 'New Game'
+    HIDE_GAME = 'Hide Game'
     DEFAULT_TEXT = 'Say something!'
 
 
