@@ -1,0 +1,7 @@
+graft dixit/static
+prune dixit/static/cards
+include dixit/static/cards/dixit/README.txt
+graft dixit/templates
+
+include LICENSE.txt
+include dixit/config.json
