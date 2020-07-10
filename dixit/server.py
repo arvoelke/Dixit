@@ -15,15 +15,15 @@ import os
 import sys
 import time
 
-from chat import ChatLog
-from codes import APIError, Codes
-from core import Limits, States, StringClue, Game
-from deck import CardSet
-from users import Users
-from utils import INFINITY, hash_obj, get_sorted_positions, url_join, \
+from dixit.chat import ChatLog
+from dixit.codes import APIError, Codes
+from dixit.core import Limits, States, StringClue, Game
+from dixit.deck import CardSet
+from dixit.users import Users
+from dixit.utils import INFINITY, hash_obj, get_sorted_positions, url_join, \
     capture_stdout
-import config
-import display
+import dixit.config as config
+import dixit.display as display
 
 
 class RequestHandler(tornado.web.RequestHandler):
@@ -371,7 +371,7 @@ settings = {
     'debug' : False,
 }
 
-configFilename = "config.json"
+configFilename = os.path.join(os.path.dirname(__file__), "config.json")
 settings.update(config.parse(configFilename))
 
 application = Application([
@@ -387,7 +387,11 @@ application = Application([
     (r'/chat', ChatHandler),
 ], **settings)
 
-if __name__ == "__main__":
 
+def start():
     application.listen(settings['port'])
     tornado.ioloop.IOLoop.instance().start()
+
+
+if __name__ == "__main__":
+    start()

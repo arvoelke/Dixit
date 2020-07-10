@@ -1,2 +1,6 @@
-static/cards/*
+dixit/static/cards/*
 *.pyc
+*.swp
+*.egg-info
+build
+dist

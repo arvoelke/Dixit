@@ -1,6 +1,6 @@
 """Holds template variables for HTML/JS/CSS."""
 
-from utils import url_join
+from dixit.utils import url_join
 
 
 class Labels(object):

@@ -2,7 +2,7 @@
 
 import time
 
-from utils import hash_obj
+from dixit.utils import hash_obj
 
 
 class ChatLog(object):

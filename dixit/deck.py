@@ -1,7 +1,7 @@
 """Data for all card related objects."""
 
 import random
-from utils import hash_obj
+from dixit.utils import hash_obj
 
 
 class Card(object):

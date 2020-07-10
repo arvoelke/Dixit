@@ -4,10 +4,10 @@ from collections import defaultdict
 import random
 import time
 
-from codes import APIError, Codes
-from deck import Deck
-from display import BunnyPalette
-from utils import INFINITY
+from dixit.codes import APIError, Codes
+from dixit.deck import Deck
+from dixit.display import BunnyPalette
+from dixit.utils import INFINITY
 
 
 class Limits(object):
