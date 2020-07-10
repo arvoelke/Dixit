@@ -29,14 +29,14 @@ install_req = [
 
 setup(
     name="Dixit",
-    version="0.1.0",
+    version="0.1.1",
     author="Aaron Voelker",
     author_email="arvoelke@gmail.com",
     packages=find_packages(),
     include_package_data=True,
     url="https://github.com/arvoelke/Dixit/",
     license="Free for personal (non-commercial) use",
-    description="Online version of the board game Dixit",
+    description="Fan server for the board game Dixit",
     long_description=read("README.rst"),
     install_requires=install_req,
     zip_safe=False,
