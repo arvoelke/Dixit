@@ -26,6 +26,8 @@ Release history
 
 - Added the ability for hosts to hide their games from the table.
   (`#11 <https://github.com/arvoelke/Dixit/pull/11>`__)
+- Configuration settings may be overriden by another config file.
+  (`#10 <https://github.com/arvoelke/Dixit/pull/10>`__)
 
 
 0.1.1 (July 10, 2020)
