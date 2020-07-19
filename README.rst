@@ -24,11 +24,13 @@ Default settings are located in ``dixit/config.json``.
 To override the defaults, you may create a JSON file in your working directory
 that contains a subset of these configuration options. For example, to change
 the port to 9000, create a new file named ``config.local.json`` that contains:
-```
-{
-    "port": 9000
-}
-```
+
+.. code-block:: JSON
+
+   {
+       "port": 9000
+   }
+
 Then pass in this file name when you launch the server, as in:
 ``dixit config.local.json``. This will override the default configuration with
 the values in ``config.local.json``.
