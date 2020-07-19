@@ -42,13 +42,13 @@ Disclaimer
 ----------
 
 This software is solely the work of several fans of the Dixit board
-game. It is not intended to substitute nor compete with the original
+game. It is not intended to replace nor compete with the original
 board game, Dixit (a registered trademark of Libellud Company), and
 likewise does not represent the works, views, nor opinions of Libellud.
 This software is provided as is, without warranty of any kind, express
 or implied.
 
-Please support the creators, designers, and artists of Dixit by
+Please support the creators, designers, and artists behind Dixit by
 purchasing the original board game and its expansions.
 
 We do not currently, nor do we plan to, distribute copywritten artwork.
