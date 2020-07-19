@@ -27,7 +27,7 @@ install:
 
 script:
   - if [[ "$JOB" == "static" ]]; then
-      black --check dixit;
+      black --check .;
     fi
   - if [[ "$JOB" == "tests" ]]; then
       py.test;
