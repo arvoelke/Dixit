@@ -1,0 +1,25 @@
+language: python
+python: 3.6
+cache: pip
+
+dist: xenial
+
+jobs:
+  include:
+    -
+      env:
+        JOB="static"
+
+before_install:
+  - pip install pip --upgrade
+  - pip freeze
+
+install:
+  - if [[ "$JOB" == "static" ]]; then
+      pip install black;
+    fi
+
+script:
+  - if [[ "$JOB" == "static" ]]; then
+      black --check dixit;
+    fi
