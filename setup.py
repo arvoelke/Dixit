@@ -26,6 +26,9 @@ install_req = [
     "tornado",
 ]
 
+tests_req = [
+    "pytest",
+]
 
 setup(
     name="Dixit",
@@ -39,12 +42,9 @@ setup(
     description="Fan-created server for the board game Dixit",
     long_description=read("README.rst", "CHANGES.rst"),
     install_requires=install_req,
+    extras_require={"tests": tests_req},
     zip_safe=False,
-    entry_points={
-        'console_scripts': [
-            'dixit = dixit:start',
-        ]
-    },
+    entry_points={"console_scripts": ["dixit = dixit:start"]},
     python_requires=">=3.5",
     classifiers=[  # https://pypi.python.org/pypi?%3Aaction=list_classifiers
         "Development Status :: 3 - Alpha",
