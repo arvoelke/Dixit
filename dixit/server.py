@@ -1,6 +1,9 @@
 """Entry point for running the Dixit server.
 
-Usage: python server.py
+Usage: dixit [config.local.json]
+
+where `config.local.json` is optionally a file containing a subset of
+the configuration in `config.json`.
 
 See https://github.com/arvoelke/dixit or README.md for more information.
 
@@ -10,6 +13,7 @@ Refer to LICENSE.txt for terms of modification and redistribution.
 import tornado.ioloop
 import tornado.web
 
+import logging
 import json
 import os
 import sys
@@ -24,6 +28,8 @@ from dixit.utils import INFINITY, hash_obj, get_sorted_positions, url_join, \
     capture_stdout
 import dixit.config as config
 import dixit.display as display
+
+logger = logging.getLogger(__name__)
 
 
 class RequestHandler(tornado.web.RequestHandler):
@@ -395,7 +401,12 @@ settings = {
 }
 
 default_config_filename = os.path.join(os.path.dirname(__file__), 'config.json')
-override_config_filename = os.path.join(os.path.dirname(__file__), 'config.local.json')
+if len(sys.argv) == 2:
+    override_config_filename = sys.argv[1]
+    logger.info("Overriding configuration using the file: %s",
+                override_config_filename)
+else:
+    override_config_filename = None
 settings.update(config.parse(default_config_filename, override_config_filename))
 
 application = Application([

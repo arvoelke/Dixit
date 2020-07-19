@@ -1,9 +1,8 @@
 """Helper file for parsing a JSON config file with comments."""
 
+from copy import deepcopy
 import json
 import re
-
-from copy import deepcopy
 
 RE_REMOVE_COMMENTS = re.compile(r'\/\/[^\n]*')
 
@@ -15,6 +14,7 @@ def _parse(config_filename):
     config_json = RE_REMOVE_COMMENTS.sub('', config_json)
     return json.loads(config_json)
 
+
 def _merge(old, new):
     result = deepcopy(old)
     for key, value in new.items():
@@ -24,12 +24,9 @@ def _merge(old, new):
 
     return result
 
-def parse(default_config_filename, override_config_filename = None):
+
+def parse(default_config_filename, override_config_filename=None):
     config = _parse(default_config_filename)
     if override_config_filename:
-        try:
-            config = _merge(config, _parse(override_config_filename))
-        except FileNotFoundError:
-            pass
-
+        config = _merge(config, _parse(override_config_filename))
     return config
