@@ -29,7 +29,7 @@ install_req = [
 
 setup(
     name="Dixit",
-    version="0.1.1",
+    version="0.1.2",
     author="Aaron Voelker",
     author_email="arvoelke@gmail.com",
     packages=find_packages(),
