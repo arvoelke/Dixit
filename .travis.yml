@@ -9,6 +9,9 @@ jobs:
     -
       env:
         JOB="static"
+    -
+      env:
+        JOB="tests"
 
 before_install:
   - pip install pip --upgrade
@@ -18,8 +21,14 @@ install:
   - if [[ "$JOB" == "static" ]]; then
       pip install black;
     fi
+  - if [[ "$JOB" == "tests" ]]; then
+      pip install -e .[tests];
+    fi
 
 script:
   - if [[ "$JOB" == "static" ]]; then
       black --check dixit;
+    fi
+  - if [[ "$JOB" == "tests" ]]; then
+      py.test;
     fi
