@@ -16,9 +16,25 @@ Then go to http://localhost:8888/.
 Configuring the Server
 ----------------------
 
-Edit ``dixit/config.json`` to specify which port to run on (default
-8888), and to point to the location of each card deck that you have
-(e.g., see ``dixit/static/cards/dixit/README.txt``).
+Configuration options, such as the port (default 8888), and the location of
+each card deck (e.g., see ``dixit/static/cards/dixit/README.txt``), are housed
+in JSON configuration files that are read when you launch the server.
+Default settings are located in ``dixit/config.json``.
+
+To override the defaults, you may create a JSON file in your working directory
+that contains a subset of these configuration options. For example, to change
+the port to 9000, create a new file named ``config.local.json`` that contains:
+```
+{
+    "port": 9000
+}
+```
+Then pass in this file name when you launch the server, as in:
+``dixit config.local.json``. This will override the default configuration with
+the values in ``config.local.json``.
+
+Alternatively, directly edit ``dixit/config.json``, to for instance, specify
+which port to use, or to point to the location of each card deck that you have.
 
 Disclaimer
 ----------
