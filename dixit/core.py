@@ -14,22 +14,22 @@ class Limits(object):
     """Static parameter limits for validation."""
 
     def __init__(self, limit_config):
-        self.min_name = self._get_int(limit_config, 'min_name')
-        self.max_name = self._get_int(limit_config, 'max_name')
+        self.min_name = self._get_int(limit_config, "min_name")
+        self.max_name = self._get_int(limit_config, "max_name")
 
-        self.min_players = self._get_int(limit_config, 'min_players')
-        self.max_players = self._get_int(limit_config, 'max_players')
+        self.min_players = self._get_int(limit_config, "min_players")
+        self.max_players = self._get_int(limit_config, "max_players")
 
-        self.min_score = self._get_int(limit_config, 'min_score')
-        self.max_score = self._get_int(limit_config, 'max_score')
+        self.min_score = self._get_int(limit_config, "min_score")
+        self.max_score = self._get_int(limit_config, "max_score")
 
-        self.min_clue_length = self._get_int(limit_config, 'min_clue_length')
-        self.max_clue_length = self._get_int(limit_config, 'max_clue_length')
+        self.min_clue_length = self._get_int(limit_config, "min_clue_length")
+        self.max_clue_length = self._get_int(limit_config, "max_clue_length")
 
-        self.max_message = self._get_int(limit_config, 'max_message')
+        self.max_message = self._get_int(limit_config, "max_message")
 
-        self.min_user_name = self._get_int(limit_config, 'min_user_name')
-        self.max_user_name = self._get_int(limit_config, 'max_user_name')
+        self.min_user_name = self._get_int(limit_config, "min_user_name")
+        self.max_user_name = self._get_int(limit_config, "max_user_name")
 
     def _get_int(self, limit_config, key):
         val = limit_config.get(key)
@@ -47,10 +47,10 @@ class States(object):
     """Possible states for the game."""
 
     BEGIN = 0  # Waiting for players to start the game.
-    CLUE = 1   # A clue is being made.
-    PLAY = 2   # Cards are being collected.
-    VOTE = 3   # Voting is occurring.
-    END = 4    # The game is over.
+    CLUE = 1  # A clue is being made.
+    PLAY = 2  # Cards are being collected.
+    VOTE = 3  # Voting is occurring.
+    END = 4  # The game is over.
 
 
 class StringClue(object):
@@ -162,8 +162,17 @@ class Game(object):
     SCORE_FOR_LOSS = 2
     SCORE_FOR_CORRECT = 3
 
-    def __init__(self, host, card_sets, password, name, max_players,
-                 max_score, max_clue_length, limits):
+    def __init__(
+        self,
+        host,
+        card_sets,
+        password,
+        name,
+        max_players,
+        max_score,
+        max_clue_length,
+        limits,
+    ):
         """Initializes the game with the parameters from CreateHandler."""
         self.host = host
         self.deck = Deck(card_sets)
@@ -228,8 +237,7 @@ class Game(object):
         """Kicks a user from the game, or throws APIError."""
         if not user in self.players:
             raise APIError(Codes.KICK_UNKNOWN_USER)
-        if len(self.players) <= self.limits.min_players and \
-           self.state != States.BEGIN:
+        if len(self.players) <= self.limits.min_players and self.state != States.BEGIN:
             raise APIError(Codes.NOT_ENOUGH_PLAYERS)
         if self.state in (States.PLAY, States.VOTE):
             raise APIError(Codes.KICK_BAD_STATE)
@@ -294,8 +302,9 @@ class Game(object):
         self.players[user].deal(self.deck.deal())
         if self.round.has_everyone_played():
             # Transition from PLAY to VOTE.
-            self.round.cast_vote(self.clue_maker(),
-                                 self.round.user_to_card[self.clue_maker()])
+            self.round.cast_vote(
+                self.clue_maker(), self.round.user_to_card[self.clue_maker()]
+            )
             self.state = States.VOTE
         self.ping()
 
@@ -338,4 +347,4 @@ class Game(object):
                     for u in v:
                         self.round.score(u, self.SCORE_FOR_CORRECT)
             else:
-                self.round.score(user, self.SCORE_FOR_TRICK*len(v))
+                self.round.score(user, self.SCORE_FOR_TRICK * len(v))

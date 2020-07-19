@@ -12,7 +12,7 @@ class ChatLog(object):
 
     def __init__(self, max_history=MAX_HISTORY):
         """Initialzes an empty chat log with a given size."""
-        self.log = [None]*max_history  # circular array
+        self.log = [None] * max_history  # circular array
         self.size = max_history
         self.tail = 0
 
@@ -20,10 +20,10 @@ class ChatLog(object):
         """Appends a new msg for a user with the given name."""
         cur_time = time.time()
         self.log[self.tail] = {
-            'user' : name,
-            'mid' : hash_obj(cur_time, add_random=True),
-            'msg' : msg,
-            't' : cur_time,
+            "user": name,
+            "mid": hash_obj(cur_time, add_random=True),
+            "msg": msg,
+            "t": cur_time,
         }
         self.tail = (self.tail + 1) % self.size
 
@@ -31,7 +31,7 @@ class ChatLog(object):
         """Returns all messages posted since the given timestamp."""
         head = (self.tail - 1) % self.size
         dump = []
-        while self.log[head] and self.log[head]['t'] > last_time:
+        while self.log[head] and self.log[head]["t"] > last_time:
             dump.append(self.log[head])
             head = (head - 1) % self.size
             if head == self.tail:  # avoid infinite loop

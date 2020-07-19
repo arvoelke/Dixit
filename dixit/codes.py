@@ -10,8 +10,8 @@ class APIError(Exception):
         super(APIError, self).__init__(exc, *args, **kwargs)
 
     def __str__(self):
-        tag = ': "%s"' % self.exc if self.exc is not None else ''
-        return '%s%s' % (self.code, tag)
+        tag = ': "%s"' % self.exc if self.exc is not None else ""
+        return "%s%s" % (self.code, tag)
 
 
 class Codes(object):

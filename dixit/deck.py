@@ -14,10 +14,7 @@ class Card(object):
 
     def to_json(self):
         """Returns the data in a JSON-serializable format."""
-        return {
-            'cid' : self.cid,
-            'url' : self.url
-        }
+        return {"cid": self.cid, "url": self.url}
 
 
 class CardSet(object):
@@ -27,8 +24,9 @@ class CardSet(object):
         """Initalizes a set of distinct Card objects."""
         self.name = name
         prefix = hash_obj(name, add_random=True)[:5]  # must be unique
-        self.cards = [Card('card%s%d' % (prefix, i), p)
-                      for i, p in enumerate(card_paths)]
+        self.cards = [
+            Card("card%s%d" % (prefix, i), p) for i, p in enumerate(card_paths)
+        ]
         self.is_default = is_default
 
     def __iter__(self):
@@ -45,7 +43,7 @@ class Deck(object):
 
     def __init__(self, card_sets, shuffle=True):
         """Builds a new deck of Card objects from a list of CardSet objects."""
-        self.name = ', '.join(card_set.name for card_set in card_sets)
+        self.name = ", ".join(card_set.name for card_set in card_sets)
         self.cards = [card for card_set in card_sets for card in card_set]
         self.card_lookup = dict((card.cid, card) for card in self.cards)
 
