@@ -36,7 +36,7 @@ setup(
     include_package_data=True,
     url="https://github.com/arvoelke/Dixit/",
     license="Free for personal (non-commercial) use",
-    description="Fan server for the board game Dixit",
+    description="Fan-created server for the board game Dixit",
     long_description=read("README.rst", "CHANGES.rst"),
     install_requires=install_req,
     zip_safe=False,
