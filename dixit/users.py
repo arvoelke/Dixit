@@ -3,7 +3,7 @@
 import time
 
 
-class User(object):
+class User:
     """Data for one user across multiple games."""
 
     def __init__(self, limits, uid, puid):
@@ -27,7 +27,7 @@ class User(object):
         return self.name
 
 
-class Users(object):
+class Users:
     """Data for all users."""
 
     def __init__(self, limits):

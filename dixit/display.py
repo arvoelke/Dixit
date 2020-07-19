@@ -3,7 +3,7 @@
 from dixit.utils import url_join
 
 
-class Labels(object):
+class Labels:
     """Text labels."""
 
     TITLE = "Dixit"
@@ -12,7 +12,7 @@ class Labels(object):
     DEFAULT_TEXT = "Say something!"
 
 
-class WebPaths(object):
+class WebPaths:
     """Client-side paths to resource directories."""
 
     STATIC = "static"
@@ -24,7 +24,7 @@ class WebPaths(object):
     JQUERY_UI = url_join(JS, "jquery-ui-1.10.4")
 
 
-class Images(object):
+class Images:
     """Client-side paths to images."""
 
     BANNER = url_join(WebPaths.IMAGES, "banner.png")
@@ -39,7 +39,7 @@ class Images(object):
     ICON_ASLEEP = url_join(WebPaths.IMAGES, "bunnyicongrey.png")
 
 
-class Sizes(object):
+class Sizes:
     """Display sizes for images."""
 
     PIECE = 45
@@ -50,7 +50,7 @@ class Sizes(object):
     TOKEN = 80
 
 
-class BunnyPalette(object):
+class BunnyPalette:
     """Bunny colours to choose from."""
 
     RED = "c52828"

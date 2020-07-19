@@ -5,7 +5,7 @@ import time
 from dixit.utils import hash_obj
 
 
-class ChatLog(object):
+class ChatLog:
     """Data for a chat log."""
 
     MAX_HISTORY = 1024  # default number of messages to store

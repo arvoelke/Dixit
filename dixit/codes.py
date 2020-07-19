@@ -14,7 +14,7 @@ class APIError(Exception):
         return "%s%s" % (self.code, tag)
 
 
-class Codes(object):
+class Codes:
     """Codes for an APIError."""
 
     JOIN_FULL_ROOM = 0
