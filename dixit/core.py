@@ -10,7 +10,7 @@ from dixit.display import BunnyPalette
 from dixit.utils import INFINITY
 
 
-class Limits(object):
+class Limits:
     """Static parameter limits for validation."""
 
     def __init__(self, limit_config):
@@ -43,7 +43,7 @@ class Limits(object):
         return INFINITY if val == -1 else val
 
 
-class States(object):
+class States:
     """Possible states for the game."""
 
     BEGIN = 0  # Waiting for players to start the game.
@@ -53,7 +53,7 @@ class States(object):
     END = 4  # The game is over.
 
 
-class StringClue(object):
+class StringClue:
     """Simple clue container. Returns the encoded text with str()."""
 
     def __init__(self, clue):
@@ -67,7 +67,7 @@ class StringClue(object):
         return len(self.clue)
 
 
-class Player(object):
+class Player:
     """Manages a user with respect to a particular game (hand/score)."""
 
     def __init__(self, user):
@@ -90,7 +90,7 @@ class Player(object):
         self.hand.remove(card)
 
 
-class Round(object):
+class Round:
     """Handles all player state across one turn (state.VOTE -> state.VOTE)."""
 
     def __init__(self, players, clue, clue_maker):
@@ -154,7 +154,7 @@ class Round(object):
         self.scores[user] += score
 
 
-class Game(object):
+class Game:
     """Handles all data over the lifetime of a single game."""
 
     CARDS_PER_PERSON = 6

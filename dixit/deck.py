@@ -4,7 +4,7 @@ import random
 from dixit.utils import hash_obj
 
 
-class Card(object):
+class Card:
     """Data for a single card."""
 
     def __init__(self, cid, url):
@@ -17,7 +17,7 @@ class Card(object):
         return {"cid": self.cid, "url": self.url}
 
 
-class CardSet(object):
+class CardSet:
     """Data for a static set of cards."""
 
     def __init__(self, name, card_paths, is_default=False):
@@ -38,7 +38,7 @@ class CardSet(object):
         return len(self.cards)
 
 
-class Deck(object):
+class Deck:
     """Data for a deck of cards. Belongs to the scope of one game."""
 
     def __init__(self, card_sets, shuffle=True):

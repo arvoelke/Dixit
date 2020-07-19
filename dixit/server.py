@@ -261,7 +261,7 @@ class ChatHandler(RequestHandler):
         self.application.chat_log.add(self.user.name, msg)
 
 
-class Commands(object):
+class Commands:
     """Possible commands for the GameHandler, to be used in the JavaScript."""
 
     GET_BOARD = 0
