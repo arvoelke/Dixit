@@ -383,7 +383,7 @@ def has_suffix(name, suffixes):
     return True in (name.endswith(suffix) for suffix in suffixes)
 
 
-def find_cards(folder, suffixes=(".jpg",)):
+def find_cards(folder, suffixes=(".jpg", ".png")):
     """Returns all urls for a given folder, matching the given suffixes."""
     path = os.path.join(os.path.dirname(__file__), display.WebPaths.CARDS, folder)
     return [
