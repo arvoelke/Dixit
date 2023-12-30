@@ -32,7 +32,7 @@ tests_req = [
 
 setup(
     name="Dixit",
-    version="0.1.2",
+    version="0.1.3",
     author="Aaron Voelker",
     author_email="arvoelke@gmail.com",
     packages=find_packages(),
