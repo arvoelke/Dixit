@@ -4,4 +4,5 @@ include dixit/static/cards/dixit/README.txt
 graft dixit/templates
 
 include LICENSE.txt
+include CHANGES.rst
 include dixit/config.json

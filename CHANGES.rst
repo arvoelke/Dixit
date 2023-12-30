@@ -19,8 +19,8 @@ Release history
    - Removed
    - Fixed
 
-0.1.2 (unreleased)
-==================
+0.1.2 (December 29, 2023)
+=========================
 
 **Added**
 
@@ -28,6 +28,8 @@ Release history
   (`#11 <https://github.com/arvoelke/Dixit/pull/11>`__)
 - Configuration settings may be overriden by another config file.
   (`#10 <https://github.com/arvoelke/Dixit/pull/10>`__)
+- Default to looking for .png extensions in card directories.
+  (`#21 <https://github.com/arvoelke/Dixit/pull/21>`__)
 
 
 0.1.1 (July 10, 2020)
